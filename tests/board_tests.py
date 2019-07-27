@@ -13,7 +13,7 @@ class TestBoard(unittest.TestCase):
         f1 = field.Field(1, 4, False)
 
         f1.setBomb()
-        self.assertFalse(f1.isBomb)
+        self.assertTrue(f1.isBomb)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
