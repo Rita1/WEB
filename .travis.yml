@@ -1,3 +1,7 @@
 language: python
 script:
-     - python3 -m pytest -v tests/board_tests.py
+- python3 -m pytest -v tests/board_tests.py
+deploy:
+  provider: heroku
+  api_key:
+    secure: CDOdFIH2PByi2Kb8ICakZ6jFs9XSMbkem4abGN5/1XShuYrJ7zFmc5Ug3MKF9lAMZKcBXZwrBNe031oBLEhkQy9dPxLdZwYcAWQiD+3//pgb8mfZk0mFaMx3KOWIwfnB4LoTY/s761blcAegiXkZdMKxinj/Rajf4CJmN+7iHyuGnMf6iQO1abpZq5tC3D5Lald0KwL4/1KLUB0501jEUlxdOUJ+sj6drVjTlGU3FdLLPN3obmqgT3QIm30oayovCrkRimt5p+tfGs47yI4SH8cMQxtNAvbh/lFVDdR8b9nd58DXTexVL8Nm7Oj9L/PqHkVUfXV4Zo6vl0bI/h0Hj0o4QFooGRn8hYBX80azw2nHy7qgfh6PZ/4pfccj2A3kZP9nWa0xSO5A9eoJgwArjnjVYKJ3hzCQyX6Y1YCQ9VtPziGUJK6Gs28ChesMH3at/mpWXfzfiOU5nXwp6KmC88c7XnbAKuJbcveNl9VM5McqMomcTH74OTy3V7KfJ8IEU/Mwo9OgIggm1ACiskwczn57EHGCYPKHPyJ5ddA1SWk/iq/rGUBSEhcqGQ3eoVn5w/kwRbg1U5FYDyc3CruBWdw/DnjDChDbzY4sBEe9eN/lQzB/MIMNmTJxWA5bW/posi6l11Xl2ozYR3V58FHAR/mCaRgKTF/6KN3xAN6eb6w=
