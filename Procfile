@@ -1,1 +1,1 @@
-web: gunicorn run:boom-minesweeper
+web: gunicorn run:app
