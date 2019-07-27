@@ -1,5 +1,10 @@
 import unittest
+# import sys
+# sys.path.append("..")
+
 from minesweeper import field
+
+
 
 class TestBoard(unittest.TestCase):
 
@@ -11,4 +16,4 @@ class TestBoard(unittest.TestCase):
         self.assertTrue(f1.isBomb)
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(verbosity=2)
