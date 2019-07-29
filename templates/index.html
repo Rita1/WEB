@@ -1,25 +1,17 @@
-<!DOCTYPE html>
-<!-- Todo:
-    Travis
-    Heroku
-    Lentele - responsive?
-    UnitTesting
-    Selenium -->
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Index</title>
-     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-           integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-</head>
-<body>
-        <div class="container">
-            <h1>Jis bent jau nėra ėjęs</h1>
-            <p>Jeigu atvirai, tai negaliu gerai atsiminti, apie ką iki šiol galvojau bėgdamas.
+{% extends "layout.html" %}
+
+{% block heading %}
+    Jis bent jau nėra ėjęs
+{% endblock %}
+
+{% block body %}
+    <p>
+        Jeigu atvirai, tai negaliu gerai atsiminti, apie ką iki šiol galvojau bėgdamas.
                 Na taip, iš tiesų, šaltomis dienomis šiek tiek galvoju apie šaltį. Karštomis dienomis šiek tiek galvoju apie karštį.
                 Kai liūdna, šiek tiek galvoju apie liūdesį. Kai linksma, šiek tiek galvoju apie linksmumą. Štai taip viskas paprasta.
                 Bėgdamas aš vien tik bėgu. Iš esmės bėgu visiškoje tuštumoje.
-                O gal atvirkščiai, bėgu tam, kad pajusčiau tuštumą. O į tą tuštumą retkarčiais įsiskverbia mintys“</p>
-        </div>
-</body>
-</html>
+                O gal atvirkščiai, bėgu tam, kad pajusčiau tuštumą. O į tą tuštumą retkarčiais įsiskverbia mintys“
+    </p>
+
+    <a href="{{ url_for('more') }}">Daugiau...</a>
+{% endblock %}

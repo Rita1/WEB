@@ -1,0 +1,3 @@
+{
+  "tests/board_tests.py::TestBoard": true
+}
