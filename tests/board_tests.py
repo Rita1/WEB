@@ -1,8 +1,11 @@
 import unittest
 
 import sys
-sys.path.append("..")
-import field
+try:
+    sys.path.append("..")
+    import field
+except:
+    from .. import field
 
 
 class TestBoard(unittest.TestCase):
