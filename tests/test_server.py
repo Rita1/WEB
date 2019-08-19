@@ -5,20 +5,20 @@ import os
 import sys
 from datetime import datetime, timedelta
 
-# from .. import field
-# from .. import board
-# from .. import run
+from .. import field
+from .. import board
+from .. import run
 
-try:
-    # sys.path.append("..")
-    from . import field
-    from . import board
-    from . import run
-except:
-    raise
-    # from .. import field
-    # from .. import board
-    # from .. import run
+# try:
+#     #  sys.path.append("..")
+#     from . import field
+#     from . import board
+#     from . import run
+# except:
+#     raise
+#     # from .. import field
+#     # from .. import board
+#     # from .. import run
 
 class TestServer(unittest.TestCase):
 
