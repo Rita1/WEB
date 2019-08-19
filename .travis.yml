@@ -1,6 +1,6 @@
 language: python
 script:
-- python -m tests.board_tests
+- python -m pytest
 deploy:
   provider: heroku
   api_key:

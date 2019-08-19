@@ -17,7 +17,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-//import Cookies from 'js-cookie';
+import Cookies from 'js-cookie';
 
 var $ = require('jquery');
 
@@ -87,6 +87,7 @@ class NameForm extends React.Component {
     super(props);
     this.state = {
       userName: '',
+      //userCookie: '',
       isRegister: false,
       size: 'small',
     
@@ -95,6 +96,8 @@ class NameForm extends React.Component {
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
   }
+
+
 
   handleChange(event) {
 
@@ -108,14 +111,25 @@ class NameForm extends React.Component {
 
   handleSubmit(event) {
 
-    // Todo, dont let submit if username is empty
-
-    this.props.sendData(this.state.userName,this.state.size);
-    this.setState({
-      isRegister: true,
-    });
+    if (this.state.userName) {
+      this.props.sendData(this.state.userName, this.state.size);
+      // this.setCookie();
+       this.setState({
+         isRegister: true,
+       });
+    }
+    else {
+      alert("Please fill Your name!");
+    }
     event.preventDefault();
   }
+
+  // setCookie() {
+  //   console.log("SetCookie");
+  //   var today = new Date();
+  //   Cookies.set('cookie', today);
+  //   console.log("Cookies.get('cookie'),", Cookies.get('cookie'));
+  // }
 
   // Enter name
   // Select size
@@ -128,8 +142,8 @@ class NameForm extends React.Component {
   render() {
     return (
       <div>
-        {this.state.isRegister && (<h2>Hy {this.state.userName}</h2>)};
-        {!this.state.isRegister && (
+        {this.state.isRegister && (<h2>Hy {this.state.userName}</h2>)}
+        {!this.state.isRegister && !this.props.gameStarted && (
         <form onSubmit={this.handleSubmit}>
           <label>
             Name:
@@ -146,6 +160,16 @@ class NameForm extends React.Component {
           </label>
           <input type="submit" value="Start Game" />
         </form>
+        )}
+        {!this.state.isRegister && this.props.gameStarted && (
+          <form onSubmit={this.handleSubmit}>
+            <label>
+              Name:
+              <input name="userName" type="text" value={this.state.userName} onChange={this.handleChange} />
+            </label>
+            <br />
+            <input type="submit" value="Start Game" />
+          </form>
         )}
       </div>
     );
@@ -168,23 +192,24 @@ class Game extends React.Component {
     super(props);
     this.state = {
       name : '',
-   //   userCookies: Cookies.get('username'),
+      userCookie: Cookies.get('cookie'),
       userName: '',
-      isRegister: false,
+      gameStart: false,
       userCount : 0,
       size : "small",
-      cordX : 4,
-      cordY: 5,
+      cordX : 0,
+      cordY: 0,
     };
     
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
     this.getData = this.getData.bind(this);
+    this.getDateCheckGameStatus = this.getDateCheckGameStatus.bind(this);
   }
     
   getData() {
 
-    if (this.state.isRegister) {
-      $.get(window.location.href + 'board', { userName: this.state.userName,  size: this.state.size}, (data) => {
+    if (this.state.gameStart) {
+      $.get(window.location.href + 'board', { userName: this.state.userName,  size: this.state.size, userCookie: this.state.userCookie}, (data) => {
         var jsonData = JSON.parse(data);
         this.setState({
           userCount : jsonData.userCount,
@@ -195,25 +220,50 @@ class Game extends React.Component {
     }
   }
 
+
+// Patikrinam ar prasidejes zaidimas serveryje:
+// Jeigu ne:
+//   Liepiam registruotis
+//   Kai uzsiregistruoja , persiunciam info i serveri ir gaunam duomenis
+// Jeigu taip:
+//   Liepiam registruotis, bet neduodam pasirinkti dydzio
+  getDateCheckGameStatus() {
+    $.get(window.location.href + 'board', { checkStart: "true"}, (data) => {
+      if (data) {
+        var jsonData2 = JSON.parse(data);
+        if (jsonData2.gameStarted) {
+          this.setState({
+            gameStart : true,
+            userCount : jsonData2.userCount,
+          });
+        }
+      }
+    });
+  }
   // Gets name, changes user name in state, passed to FORM
   handleSubmitForm (name, size) {
-
+    
+    var randomInt = Math.floor(Math.random() * 10000);
     this.setState({
       userName : name,
-      isRegister: true,
+      gameStart: true,
       size: size,
+      userCookie: randomInt,
     }, () => {
       this.getData();
     });
-  }
+  } 
 
   render() {
     
     console.log("State from Game render",this.state);
+    if (! this.state.gameStart) {
+      this.getDateCheckGameStatus();
+    }
     return ( 
       <div className="game-board" key={1}>
         <h2>Active Players: {this.state.userCount}</h2>
-        <NameForm sendData={this.handleSubmitForm}/>
+        <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
         <Board cordX={this.state.cordX} cordY={this.state.cordY}/>
       </div>
     );
@@ -225,7 +275,5 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-
-// https://vladimirponomarev.com/blog/authentication-in-react-apps-creating-components
-// https://serverless-stack.com/chapters/create-a-login-page.html?fbclid=IwAR0nx5eyiCZQltAFqvF1OQ_jte78lKFK54bD-zp1GcywYXW8tXzBb-386Pc
-// https://stackoverflow.com/questions/51109559/get-cookie-with-react
+// https://stackoverflow.com/questions/45069728/sending-api-call-before-page-reload-or-close-using-react?fbclid=IwAR3OA3o0T1Fs6Q-IWnkg3-jPrEkwfGxemXxkLBrq6CT6HqBQ6x5sWXHMCj0
+// https://stackoverflow.com/questions/147636/best-way-to-detect-when-a-user-leaves-a-web-page?fbclid=IwAR0E7kW7Tj2Sd5Q9hDKZR67kk_1CqP1Lxcm-D_Z1Thn6J47YaC8pJdFsxOQ
