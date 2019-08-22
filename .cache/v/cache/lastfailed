@@ -1,3 +1,5 @@
 {
-  "tests/board_tests.py::TestBoard": true
+  "tests/board_tests.py::TestBoard": true, 
+  "tests/test_board.py": true, 
+  "tests/test_server.py": true
 }

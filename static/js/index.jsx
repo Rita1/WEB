@@ -7,6 +7,7 @@
 // https://linoxide.com/linux-how-to/setup-python-virtual-environment-ubuntu/
 // https://www.npmjs.com/package/react-cookie
 // https://reactjs.org/docs/testing-environments.html
+// https://www.npmjs.com/package/react-beforeunload
 
 // Game
 // Board
@@ -18,6 +19,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import Cookies from 'js-cookie';
+import { Beforeunload } from 'react-beforeunload';
 
 var $ = require('jquery');
 
@@ -204,17 +206,25 @@ class Game extends React.Component {
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
     this.getData = this.getData.bind(this);
     this.getDateCheckGameStatus = this.getDateCheckGameStatus.bind(this);
+    this.handleUnload = this.handleUnload.bind(this);
   }
-    
+  
+  handleUnload () {
+
+    $.get(window.location.href + 'board', { logout: true,  userCookie: this.state.userCookie}, (data) => {
+    });
+  } 
+
+
   getData() {
 
     if (this.state.gameStart) {
       $.get(window.location.href + 'board', { userName: this.state.userName,  size: this.state.size, userCookie: this.state.userCookie}, (data) => {
-        var jsonData = JSON.parse(data);
+        // var jsonData = JSON.parse(data);
         this.setState({
-          userCount : jsonData.userCount,
-          cordX : jsonData.board.cordX,
-          cordY : jsonData.board.cordY,
+          userCount : data.userCount,
+          cordX : data.board.cordX,
+          cordY : data.board.cordY,
         });
       });
     }
@@ -230,11 +240,11 @@ class Game extends React.Component {
   getDateCheckGameStatus() {
     $.get(window.location.href + 'board', { checkStart: "true"}, (data) => {
       if (data) {
-        var jsonData2 = JSON.parse(data);
-        if (jsonData2.gameStarted) {
+        // var jsonData2 = JSON.parse(data);
+        if (data.gameStarted) {
           this.setState({
             gameStart : true,
-            userCount : jsonData2.userCount,
+            userCount : data.userCount,
           });
         }
       }
@@ -261,11 +271,13 @@ class Game extends React.Component {
       this.getDateCheckGameStatus();
     }
     return ( 
-      <div className="game-board" key={1}>
-        <h2>Active Players: {this.state.userCount}</h2>
-        <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-        <Board cordX={this.state.cordX} cordY={this.state.cordY}/>
-      </div>
+      <Beforeunload onBeforeunload={this.handleUnload}>
+        <div className="game-board" key={1}>
+          <h2>Active Players: {this.state.userCount}</h2>
+          <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
+          <Board cordX={this.state.cordX} cordY={this.state.cordY}/>
+        </div>
+      </Beforeunload>
     );
   }
 }

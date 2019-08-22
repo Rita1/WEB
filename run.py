@@ -1,5 +1,6 @@
 # source env/bin/activate
 # export FLASK_APP=run.py
+# export FLASK_ENV=development
 # flask run
 # pip freeze > requirements.txt
 # npm run watch
@@ -14,6 +15,8 @@ import io
 import os
 from flask import Flask, render_template, request
 from . import board
+from flask import Response
+
 
 # app = Flask(__name__,  template_folder='./static')
 app = Flask(__name__, static_url_path='/static', template_folder='./static')
@@ -26,8 +29,12 @@ class Server():
     active_users = 0
     HOURS_OLD = 1
 
-    @app.route('/')
+    @app.route('/', methods=['GET', 'POST'])
     def index():
+        if request.method == 'POST':
+            data = request.get_json()
+            if data['restart']:
+                Server.restart_server()
         return render_template('index.html')
     
     # Board : sizeX, sizeY, listof Fields
@@ -60,7 +67,7 @@ class Server():
         if checkStatus and Server.game == '':
             answ_not_started = {"gameStarted" : False}
             print("answer from server", answ_not_started)
-            return json.dumps(answ_not_started)
+            return Response(json.dumps(answ_not_started), mimetype='application/json')
 
         # Start game if needed
         Server.getGame(size, 0)
@@ -74,12 +81,13 @@ class Server():
         answ = Server.toJson()
         print("Answer from server", answ)
         answ_json = json.dumps(answ)
-        return answ_json
+
+        return Response(answ_json, mimetype='application/json')
     
     def getGame(size, usercount):
         
         if not Server.game:
-            Server.game = board.Board(size, usercount)
+            Server.game = board.Board(size)
         return Server.game
 
     # Takes user name and ID
@@ -125,6 +133,12 @@ class Server():
             to_write.write(buffer.getvalue())
             buffer.flush()
         Server.active_users = count
+
+    def restart_server():
+        if os.path.exists('users.txt'):
+            open("users.txt", 'w').close()
+        Server.game = ''
+        Server.active_users = 0
 
     def toJson():
         answ = {

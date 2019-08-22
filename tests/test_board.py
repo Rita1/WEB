@@ -56,10 +56,35 @@ class TestBoard(unittest.TestCase):
 
     def test_create_board(self):
 
-        b1 = board.Board(1, 1)
+        b1 = board.Board("small")
         b1Dict = b1.toJson()
-        print("b1Dict", b1Dict)
-        #self.assertEqual(b1Dict)
+
+        self.assertEqual(b1Dict["cordX"], 9)
+        self.assertEqual(b1Dict["cordY"], 9)
+        fields_len = len(b1Dict["fieldList"])
+        self.assertEqual(81, fields_len)
+
+        b2 = board.Board("medium")
+        b2Dict = b2.toJson()
+        self.assertEqual(b2Dict["cordX"], 16)
+        self.assertEqual(b2Dict["cordY"], 16)
+        fields_len2 = len(b2Dict["fieldList"])
+        self.assertEqual(256, fields_len2)
+
+        b3 = board.Board("large")
+        b3Dict = b3.toJson()
+        self.assertEqual(b3Dict["cordX"], 30)
+        self.assertEqual(b3Dict["cordY"], 24)
+        fields_len3 = len(b3Dict["fieldList"])
+        self.assertEqual(720, fields_len3)
+
+    def test_create_board2(self):
+
+        b4 = board.Board("medium")
+        f4 = b4.get_field(0)
+
+        self.assertEqual(0, f4.getX())
+        self.assertEqual(0, f4.getY())
 
 
 #################
