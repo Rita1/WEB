@@ -118,30 +118,30 @@ class TestBoard(unittest.TestCase):
 
         self.assertEqual(41, bomb_count2)    
 
-    def test_parse_board(self):
+    # def test_parse_board(self):
         
-        file1 = os.path.join(__location__, 'boards/board2')
-        b2 = board.Board("any", file1)
+    #     file1 = os.path.join(__location__, 'boards/board2')
+    #     b2 = board.Board("any", file1)
         
-        self.assertEqual(4, b2.getXandY()[0])
-        self.assertEqual(5, b2.getXandY()[1])
+    #     self.assertEqual(4, b2.getXandY()[0])
+    #     self.assertEqual(5, b2.getXandY()[1])
         
-        bomb_count = 0
-        for i in range(4*5):
-            f = b2.get_field(i)
-            if f.is_Bomb():
-                bomb_count += 1
+    #     bomb_count = 0
+    #     for i in range(4*5):
+    #         f = b2.get_field(i)
+    #         if f.is_Bomb():
+    #             bomb_count += 1
         
-        f1 = b2.get_field(0)
-        f2 = b2.get_field(17)
-        f3 = b2.get_field(19)
-        f4 = b2.get_field(18)
+    #     f1 = b2.get_field(0)
+    #     f2 = b2.get_field(17)
+    #     f3 = b2.get_field(19)
+    #     f4 = b2.get_field(18)
 
-        self.assertEqual(3, bomb_count)
-        self.assertTrue(f1.is_Bomb())
-        self.assertTrue(f2.is_Bomb())
-        self.assertTrue(f3.is_Bomb())
-        self.assertFalse(f4.is_Bomb())
+    #     self.assertEqual(3, bomb_count)
+    #     self.assertTrue(f1.is_Bomb())
+    #     self.assertTrue(f2.is_Bomb())
+    #     self.assertTrue(f3.is_Bomb())
+    #     self.assertFalse(f4.is_Bomb())
 
     # def test_dug_board(self):
 
