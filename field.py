@@ -10,14 +10,15 @@ class Field():
     def get_condition(self):
         return self.condition
 
-    def setBomb(self):
+    def set_Bomb(self):
         self.isBomb = True
 
     def setNotBomb(self):
         self.isBomb = False
 
-    def isBomb(self):
+    def is_Bomb(self):
         bomb = self.isBomb
+        print("bomb?", bomb)
         return bomb
 
     def dig(self):
@@ -30,10 +31,10 @@ class Field():
         self.condition = "UNTOUCH"
 
     def getX(self):
-        self.x
+        return self.x
 
     def getY(self):
-        self.y
+        return self.y
 
     def getBombCount(self):
         return self.countBomb
