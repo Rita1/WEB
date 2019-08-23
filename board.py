@@ -1,4 +1,8 @@
-from . import field
+
+try:
+    from . import field
+except:
+    import field
 import random
 
 class Board():
