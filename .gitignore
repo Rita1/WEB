@@ -2,3 +2,10 @@
 /.cache/
 node_modules
 /cypress/integration/examples/
+*.pyc
+__pycache__/run.cpython-36.pyc
+.vscode/
+flask_session/
+package-lock.json
+users.txt
+

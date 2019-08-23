@@ -31,35 +31,47 @@ class Board():
                 print("large", self.sizeX, self.sizeY)
             new_board_fields = Board.get_new_fields(self.sizeX, self.sizeY)
             new_board_with_bombs = Board.set_bombs(new_board_fields, self.sizeX, self.sizeY)
-            self.fields = new_board_with_bombs
+            with_bombs_count = Board.count_bombs(new_board_with_bombs, self.sizeX, self.sizeY)
+            self.fields = with_bombs_count
  
         else:
-            new_board_fields = Board.parse_file(file1)
-            self.fields = new_board_fields
+            self.parse_file(file1)
 
-            #TODO
-            self.sizeX = 0
-            self.sizeY = 0
-            
-            
-    
-    def parse_file(file1):
+    def parse_file(self, file1):
         
         fieldList = []
-        # with open('file1', 'r') as to_read:
-        #     for line in to_read:
-        #         pass
+        first_line = True
+        index = 0
+        with open(file1, 'r') as to_read:
+            for line in to_read:
+                if first_line:
+                    parts = line.split(" ")
+                    x = int(parts[0])
+                    y = int(parts[1])
+                    first_line = False
 
+                    fieldList = Board.get_new_fields(x, y)
+                    
+                else:
+                    parts = line.split(" ")
+                    for part in parts:
+                        print("part", part)
+                        if int(part) == 1:
+                            field = fieldList[index]
+                            field.set_Bomb()
+                        index += 1
+        with_bombs_count = Board.count_bombs(fieldList, x, y)
 
-        return fieldList
+        self.sizeX = x
+        self.sizeY = y
+        self.fields = with_bombs_count
 
     def get_new_fields(x, y):
         fieldList = []
         for i in range(y):
             for n in range(x):
                 f = field.Field(n, i, False)
-                fieldList.append(f)
-        # print("fieldList", fieldList)        
+                fieldList.append(f)     
         return fieldList
 
     # random seeds bombs in given field list
@@ -71,19 +83,97 @@ class Board():
         size = (x * y) - 1
         random_element = int(random.random() * size)
         field = fields[random_element]
-        print("field", field, field.is_Bomb())
         
         while bomb_count > 0:
             
             random_element = int(random.random() * size)
-        #     print("ran+elm, random()", random_element, random.random())
             field = fields[random_element]
-            print("field", field, field.is_Bomb())
             if not field.is_Bomb():
                 field.set_Bomb()
                 bomb_count -= 1
 
         return fields
+    
+    # Helper method to count bombs. COUNT neighbors that have a bomb
+    # newly created board
+    # board with bombs count
+
+    def count_bombs(fields, x, y):
+        countedBombs = []
+
+        # Create Counter
+        for i in range(x*y):
+            countedBombs.append(0)
+
+        # Update by found bomb
+        for f in fields:
+            if f.is_Bomb():
+                countedBombs = Board.update_count(countedBombs, f, x, y)
+
+        # Update fields
+        for n in range(y*x):
+            field = fields[n]
+            c = countedBombs[n]
+            field.setBombCount(c)
+
+        return fields
+
+   # Update related fields (Right, Left, Up, Down and 4 diag. by bomb counts
+    # counter - already counted bombs
+    # bomb - field, where bomb is found
+    # board X size
+    # board Y size
+    # return updated list of integers
+    def update_count(counter, bomb, CordX, CordY):
+
+        x = bomb.getX()
+        y = bomb.getY()
+        
+        # Right
+        if (x + 1) < CordX:
+            indexR = Board.return_index(x+1, y, CordX, CordY)
+            bombCount = counter[indexR]
+            counter[indexR] = bombCount + 1
+           # print("IndexR, Counter R", indexR, counter)
+        # Left
+        if (x - 1) >= 0:
+            indexL = Board.return_index(x-1, y, CordX, CordY)
+            bombCount = counter[indexL]
+            counter[indexL] = bombCount + 1
+          #  print("IndexL, Counter L", indexL, counter)
+        # Up
+        if (y - 1) >= 0:
+            indexU = Board.return_index(x, y-1, CordX, CordY)
+            bombCount = counter[indexU]
+            counter[indexU] = bombCount + 1
+          #  print("IndexU, Counter U", indexU, counter)
+        # Down
+        if (y + 1) < CordY:
+            indexD = Board.return_index(x, y+1, CordX, CordY)
+            bombCount = counter[indexD]
+            counter[indexD] = bombCount + 1
+        # right-down
+        if ((y + 1) < CordY) and ((x + 1) < CordX):
+            indexRD = Board.return_index(x + 1, y + 1, CordX, CordY)
+            bombCount = counter[indexRD]
+            counter[indexRD] = bombCount + 1
+        # left-down
+        if ((y + 1) < CordY) and ((x - 1) >= 0):
+            indexLD = Board.return_index(x-1, y+1, CordX, CordY)
+            bombCount = counter[indexLD]
+            counter[indexLD] = bombCount + 1
+        # right-up
+        if (y - 1) >= 0 and (x + 1) < CordX:
+            indexRU = Board.return_index(x + 1, y - 1, CordX, CordY)
+            bombCount = counter[indexRU]
+            counter[indexRU] = bombCount + 1
+        # left-up
+        if (y - 1) >= 0 and (x - 1) >= 0:
+            indexLU = Board.return_index(x-1, y-1, CordX, CordY)
+            bombCount = counter[indexLU]
+            counter[indexLU] = bombCount + 1
+        return counter
+
 
     # field index in board list, start from 0
     # return field by index
@@ -94,6 +184,15 @@ class Board():
     def getXandY(self):
         XandY = (self.sizeX, self.sizeY)
         return XandY
+    
+    # Helper method calculate index from x and y
+    # x coordinate
+    # y coordinate
+    # return calculated index started from 0
+
+    def return_index(x, y, CordX, CordY):
+        index = (y * CordX) + x
+        return index
 
     def toJson(self):
 

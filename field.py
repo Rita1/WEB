@@ -18,7 +18,6 @@ class Field():
 
     def is_Bomb(self):
         bomb = self.isBomb
-        print("bomb?", bomb)
         return bomb
 
     def dig(self):

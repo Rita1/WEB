@@ -118,30 +118,74 @@ class TestBoard(unittest.TestCase):
 
         self.assertEqual(41, bomb_count2)    
 
-    # def test_parse_board(self):
+    def test_parse_board(self):
         
-    #     file1 = os.path.join(__location__, 'boards/board2')
-    #     b2 = board.Board("any", file1)
+        file1 = os.path.join(__location__, 'boards/board2')
+        b2 = board.Board("any", file1)
         
-    #     self.assertEqual(4, b2.getXandY()[0])
-    #     self.assertEqual(5, b2.getXandY()[1])
+        self.assertEqual(4, b2.getXandY()[0])
+        self.assertEqual(5, b2.getXandY()[1])
         
-    #     bomb_count = 0
-    #     for i in range(4*5):
-    #         f = b2.get_field(i)
-    #         if f.is_Bomb():
-    #             bomb_count += 1
+        bomb_count = 0
+        for i in range(4*5):
+            f = b2.get_field(i)
+            if f.is_Bomb():
+                bomb_count += 1
         
-    #     f1 = b2.get_field(0)
-    #     f2 = b2.get_field(17)
-    #     f3 = b2.get_field(19)
-    #     f4 = b2.get_field(18)
+        f1 = b2.get_field(0)
+        f2 = b2.get_field(16)
+        f3 = b2.get_field(19)
+        f4 = b2.get_field(18)
 
-    #     self.assertEqual(3, bomb_count)
-    #     self.assertTrue(f1.is_Bomb())
-    #     self.assertTrue(f2.is_Bomb())
-    #     self.assertTrue(f3.is_Bomb())
-    #     self.assertFalse(f4.is_Bomb())
+        self.assertEqual(3, bomb_count)
+        self.assertTrue(f1.is_Bomb())
+        self.assertTrue(f2.is_Bomb())
+        self.assertTrue(f3.is_Bomb())
+        self.assertFalse(f4.is_Bomb())
+
+    def test_return_index(self):
+
+        i1 = board.Board.return_index(0, 0, 2, 3)
+        self.assertEqual(0, i1)
+
+        i5 = board.Board.return_index(1, 1, 3, 2)
+        self.assertEqual(4, i5)
+    
+    # B 1 0
+    # 1 1 0
+
+    def test_count_right(self):
+
+        file1 = os.path.join(__location__, 'boards/board4')
+        b2 = board.Board("any", file1)
+
+        answer_string = "0 1 0 1 1 0"
+        answer = answer_string.split(" ")
+        
+        for i in range(2*3):
+            f = b2.get_field(i)
+            a = int(answer[i])
+            self.assertEqual(a, f.getBombCount())
+    
+    # B 2 B 1 0 
+    # 1 2 1 1 0
+    # 1 1 1 0 0
+    # 1 B 1 1 1
+    # 2 3 2 3 B
+    # B 2 B 3 B
+
+    def test_count_full(self):
+
+        file1 = os.path.join(__location__, 'boards/board3')
+        b2 = board.Board("any", file1)
+
+        answer_string = "0 2 0 1 0 " + "1 2 1 1 0 " + "1 1 1 0 0 " + "1 0 1 1 1 " + "2 3 2 3 1 " + "0 2 0 3 1"
+        answer = answer_string.split(" ")
+        
+        for i in range(5*6):
+            f = b2.get_field(i)
+            a = int(answer[i])
+            self.assertEqual(a, f.getBombCount())
 
     # def test_dug_board(self):
 
