@@ -14,7 +14,10 @@ from datetime import datetime, timedelta
 import io
 import os
 from flask import Flask, render_template, request
-from . import board
+try:
+    from . import board
+except:
+    import board
 from flask import Response
 
 
