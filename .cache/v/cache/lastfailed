@@ -1,5 +1,16 @@
 {
   "tests/board_tests.py::TestBoard": true, 
-  "tests/test_board.py": true, 
-  "tests/test_server.py": true
+  "tests/test_board.py::TestBoard": true, 
+  "tests/test_board.py::TestBoard::test_count_bombs": true, 
+  "tests/test_board.py::TestBoard::test_count_full": true, 
+  "tests/test_board.py::TestBoard::test_count_right": true, 
+  "tests/test_board.py::TestBoard::test_create_board": true, 
+  "tests/test_board.py::TestBoard::test_create_board2": true, 
+  "tests/test_board.py::TestBoard::test_dug_board": true, 
+  "tests/test_board.py::TestBoard::test_dug_recursive": true, 
+  "tests/test_board.py::TestBoard::test_parse_board": true, 
+  "tests/test_board.py::TestBoard::test_return_index": true, 
+  "tests/test_server.py::TestServer": true, 
+  "tests/test_server.py::TestServer::test_calculate_users": true, 
+  "tests/test_server.py::TestServer::test_old_user": true
 }

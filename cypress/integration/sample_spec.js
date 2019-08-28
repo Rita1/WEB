@@ -17,6 +17,7 @@ describe("Active Users", function() {
         // 1 user
         cy.get('[name=userName]').type('Jhon')
         cy.get('form').contains('Start Game').click({ force: true })
+        cy.wait(2000)
         cy.get('h2').contains('1')
         // 2 user
         cy.request('/board?userName=Jane&size=small&userCookie=1')
@@ -29,5 +30,20 @@ describe("Active Users", function() {
               expect(response.body).to.have.property("userCount", 1)
         })
 
+    })
+
+    it("Push Button 1 user", function() {
+
+        cy.request('POST', '/', { restart: true, debug: true})
+        cy.visit('/')
+        // 1 user
+        cy.get('[name=userName]').type('Jhon')
+        cy.get('form').contains('Start Game').click({ force: true })
+        // Click
+        cy.get('[id=1]').click()
+        cy.get('[id=1]').contains('2')
+        // Flag
+        cy.get('[id=0]').trigger('contextmenu')
+        
     })
 })

@@ -23,13 +23,22 @@ import { Beforeunload } from 'react-beforeunload';
 
 var $ = require('jquery');
 
-function Field() {
+function Field(props) {
+  var bnt_class = 'square';
+  var bombCount = ''
+  if (props.status.condition != 'UNTOUCH') {
+    bnt_class = 'square-clicked';
+    bombCount = props.status.bomb_count;
+    console.log("bnt_class", bnt_class);
+  }
   return (
-    <button className="square" >
-      !
+    <button id={props.i} className={bnt_class} onClick={props.onClick} onContextMenu={props.onContextMenu}>
+      { bombCount }
     </button>
   );
 }
+
+// https://stackoverflow.com/questions/41978408/changing-style-of-a-button-on-click
 
 class Board extends React.Component {
 
@@ -37,17 +46,20 @@ class Board extends React.Component {
     super(props);
   }
 
-  renderField() {
-    return <Field />;
+  renderField(x, y) {
+    var i = this.return_index(x, y, this.props.cordX);
+    // console.log("Fields from board", this.props.fields);
+    return <Field i={i} status={this.props.fields[i]} onClick={() => this.props.onClick(i)}
+    onContextMenu={() => this.props.onContextMenu(i)}/>;
   }
 
-  renderBoardCol() {
+  renderBoardCol(y) {
 
     var x = this.props.cordX;
     var col = [];
     var n;
     for (n = 0; n < x; n++) {
-      col.push(<div className="board-col" key={n}>{this.renderField()}</div>);
+      col.push(<div className="board-col" key={n}>{this.renderField(n, y)}</div>);
     }
     return col;
   }
@@ -62,9 +74,17 @@ class Board extends React.Component {
     var i;
     for (i = 0; i < y; i++) {
       lines.push(<div className="board-row" key={i}>
-      {this.renderBoardCol()}</div>);
+      {this.renderBoardCol(i)}</div>);
     }
     return lines;
+  }
+
+  // Helper method calculate Index
+  
+  return_index(x, y, CordX) {
+    var index = (y * CordX) + x;
+    console.log("index x, y, CordX", x, y, CordX);
+    return index
   }
 
   render () {
@@ -85,6 +105,7 @@ class NameForm extends React.Component {
   // user name
   // isRegister true if pressed StartGame
   // size: Small, Medium, Large
+  // TODO user name, size
   constructor(props) {
     super(props);
     this.state = {
@@ -144,11 +165,11 @@ class NameForm extends React.Component {
   render() {
     return (
       <div>
-        {this.state.isRegister && (<h2>Hy {this.state.userName}</h2>)}
+        {this.state.isRegister && (<h2>Hello,  {this.state.userName}</h2>)}
         {!this.state.isRegister && !this.props.gameStarted && (
         <form onSubmit={this.handleSubmit}>
           <label>
-            Name:
+            User Name:
             <input name="userName" type="text" value={this.state.userName} onChange={this.handleChange} />
           </label>
           <br />
@@ -201,58 +222,56 @@ class Game extends React.Component {
       size : "small",
       cordX : 0,
       cordY: 0,
+      fields: [],
     };
     
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
-    this.getData = this.getData.bind(this);
     this.getDateCheckGameStatus = this.getDateCheckGameStatus.bind(this);
     this.handleUnload = this.handleUnload.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.handleRightClick = this.handleRightClick.bind(this);
   }
-  
-  handleUnload () {
 
-    $.get(window.location.href + 'board', { logout: true,  userCookie: this.state.userCookie}, (data) => {
-    });
-  } 
-
-
-  getData() {
-
-    if (this.state.gameStart) {
-      $.get(window.location.href + 'board', { userName: this.state.userName,  size: this.state.size, userCookie: this.state.userCookie}, (data) => {
-        // var jsonData = JSON.parse(data);
-        this.setState({
-          userCount : data.userCount,
-          cordX : data.board.cordX,
-          cordY : data.board.cordY,
-        });
-      });
+  getData(toSend) {
+    if (! toSend) {
+      toSend = {}
     }
-  }
+    var fromState = {};
+    var fullData = {};
 
+    fromState.userCookie = this.state.userCookie;
+    fromState.userName = this.state.userName;
+    fromState.size = this.state.size;
 
-// Patikrinam ar prasidejes zaidimas serveryje:
-// Jeigu ne:
-//   Liepiam registruotis
-//   Kai uzsiregistruoja , persiunciam info i serveri ir gaunam duomenis
-// Jeigu taip:
-//   Liepiam registruotis, bet neduodam pasirinkti dydzio
-  getDateCheckGameStatus() {
-    $.get(window.location.href + 'board', { checkStart: "true"}, (data) => {
+    fullData = Object.assign(toSend, fromState);
+    $.get(window.location.href + 'board', fullData, (data) => {
       if (data) {
-        // var jsonData2 = JSON.parse(data);
+        if (data.board) {
+          if (data.board.fieldList){
+            this.setState({
+              fields : data.board.fieldList
+            });
+          }
+          this.setState({
+            cordX : data.board.cordX,
+            cordY : data.board.cordY,
+          });
+        }
         if (data.gameStarted) {
           this.setState({
             gameStart : true,
-            userCount : data.userCount,
           });
         }
+        this.setState({
+          userCount : data.userCount,
+        });
       }
     });
   }
+
   // Gets name, changes user name in state, passed to FORM
   handleSubmitForm (name, size) {
-    
+  
     var randomInt = Math.floor(Math.random() * 10000);
     this.setState({
       userName : name,
@@ -262,7 +281,35 @@ class Game extends React.Component {
     }, () => {
       this.getData();
     });
+  }
+
+  // Send Left and right click info to server
+  handleClick (i) {
+    console.log("Handle click")
+    this.getData( { action : 'dig', id : i } )
+  }
+
+  handleRightClick(i) {
+    console.log("Right click")
+    this.getData( { action : 'flag' } )
+  }
+  // Send to server, then window is closed
+  handleUnload () {
+    console.log("Status unload")
+    this.getData( { logout : true } )
   } 
+
+  // Patikrinam ar prasidejes zaidimas serveryje:
+  // Jeigu ne:
+  //   Liepiam registruotis
+  //   Kai uzsiregistruoja , persiunciam info i serveri ir gaunam duomenis
+  // Jeigu taip:
+  //   Liepiam registruotis, bet neduodam pasirinkti dydzio
+
+  getDateCheckGameStatus() {
+    console.log("Status check")
+    this.getData( { checkStart : true } )
+  }
 
   render() {
     
@@ -275,7 +322,11 @@ class Game extends React.Component {
         <div className="game-board" key={1}>
           <h2>Active Players: {this.state.userCount}</h2>
           <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-          <Board cordX={this.state.cordX} cordY={this.state.cordY}/>
+          {this.state.userName && (
+          <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
+            onClick={(x, y) => this.handleClick(x, y)} 
+            onContextMenu={(x,y) => this.handleRightClick(x, y)}/>
+          )}
         </div>
       </Beforeunload>
     );

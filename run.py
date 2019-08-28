@@ -24,6 +24,8 @@ from flask import Response
 # app = Flask(__name__,  template_folder='./static')
 app = Flask(__name__, static_url_path='/static', template_folder='./static')
 
+__location__ = os.path.realpath(
+        os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
 
 class Server():
@@ -31,6 +33,8 @@ class Server():
     game = ''
     active_users = 0
     HOURS_OLD = 1
+    debug = False
+    file1 = os.path.join(__location__, 'boards/board3')
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
@@ -60,6 +64,12 @@ class Server():
         user_cookie = request.args.get('userCookie')
         checkStatus = request.args.get("checkStart")
         size = request.args.get('size')
+        action = request.args.get('action')
+        field_id = request.args.get('id')
+
+        debug = False
+        if request.args.get('debug'):
+            debug = True
 
         logout = False
         if request.args.get('logout'):
@@ -73,12 +83,20 @@ class Server():
             return Response(json.dumps(answ_not_started), mimetype='application/json')
 
         # Start game if needed
-        Server.getGame(size, 0)
+        Server.getGame(size, debug)
         print("Server game", Server.game)
         
         # Calculate users
 
         Server.calculate_users(user_name, user_cookie, logout)
+
+        # Dig
+
+        if action == 'dig':
+            print("Diging")
+            Server.game.dig(int (field_id))
+        if action == 'flag':
+            Server.game.flag(int (field_id))
         
         # Return answer
         answ = Server.toJson()
@@ -87,8 +105,11 @@ class Server():
 
         return Response(answ_json, mimetype='application/json')
     
-    def getGame(size, usercount):
+    def getGame(size, debug):
         
+        if not Server.game and debug:
+            Server.restart_server()
+            Server.game = board.Board(size, debug)
         if not Server.game:
             Server.game = board.Board(size)
         return Server.game
@@ -144,34 +165,35 @@ class Server():
         Server.active_users = 0
 
     def toJson():
-        answ = {
-            "userCount" : 2,
-            "board" : {
-                "cordX" : 9,
-                "cordY" : 9,
-                "fieldList" : {
-                    0 : {
-                        "cordX" : 0,
-                        "cordY" : 0,
-                        "condition" : "Untouch",
-                        "isBomb" : False,
-                        "bombCount" : 0
-                    },
-                    1 : {
-                        "cordX" : 1,
-                        "cordY" : 0,
-                        "condition" : "Untouch",
-                        "isBomb" : False,
-                        "bombCount" : 0
-                    }
-                }
-            },
-        }
-
+        answ = {}
+        # answ = {
+        #     "userCount" : 2,
+        #     "board" : {
+        #         "cordX" : 9,
+        #         "cordY" : 9,
+        #         "fieldList" : {
+        #             0 : {
+        #                 "cordX" : 0,
+        #                 "cordY" : 0,
+        #                 "condition" : "Untouch",
+        #                 "isBomb" : False,
+        #                 "bombCount" : 0
+        #             },
+        #             1 : {
+        #                 "cordX" : 1,
+        #                 "cordY" : 0,
+        #                 "condition" : "Untouch",
+        #                 "isBomb" : False,
+        #                 "bombCount" : 0
+        #             }
+        #         }
+        #     },
+        # }
+        
         answ["gameStarted"] = True
         user_count = Server.active_users
         answ["userCount"] = user_count
-
+        answ["board"] = Server.game.toJson()
         return answ
 
 

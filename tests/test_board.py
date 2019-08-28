@@ -1,7 +1,6 @@
 import unittest
 import pytest
 import os
-import sys
 
 from .. import field
 from .. import board
@@ -186,16 +185,85 @@ class TestBoard(unittest.TestCase):
             f = b2.get_field(i)
             a = int(answer[i])
             self.assertEqual(a, f.getBombCount())
+    
+    # 0 1
+    # 2 3
+    # 3 4
 
-    # def test_dug_board(self):
+    def test_return_x_y(self):
+        x = board.Board.return_x_y(0, 2, 3)[0]
+        y = board.Board.return_x_y(0, 2, 3)[1]
 
-    #     file1 = os.path.join(__location__, 'boards/board4')
-    #     self.assertTrue(os.path.exists(file1))
+        self.assertEqual(0, x)
+        self.assertEqual(0, y)
 
-    #     b1 = board.Board("any", file1)
-    #     self.assertEqual("a", b1)
+        x = board.Board.return_x_y(1, 2, 3)[0]
+        y = board.Board.return_x_y(1, 2, 3)[1]
 
-    #     # TODO DUG
+        self.assertEqual(1, x)
+        self.assertEqual(0, y)
+
+    # 0 1
+    # 2 3
+    # 4 5
+        x = board.Board.return_x_y(3, 2, 3)[0]
+        y = board.Board.return_x_y(3, 2, 3)[1]
+
+        self.assertEqual(1, x)
+        self.assertEqual(1, y)
+    # 0 1 2
+    # 3 4 5
+    # 6 7 8
+
+        x = board.Board.return_x_y(8, 3, 3)[0]
+        y = board.Board.return_x_y(8, 3, 3)[1]
+
+        self.assertEqual(2, x)
+        self.assertEqual(2, y)
+
+
+    def test_dug_board(self):
+
+        file1 = os.path.join(__location__, 'boards/board4')
+        b1 = board.Board("any", file1)
+        
+        b1.dig(5)
+        b1Dict = b1.toJson()
+        fl = b1Dict["fieldList"][5]["condition"]
+        self.assertEqual("DUG", fl)
+
+    # 0 0 0 0
+    def test_dug_recursive(self):
+
+        file1 = os.path.join(__location__, 'boards/board6')
+        b1 = board.Board("any", file1)
+        
+        b1.dig(0)
+        fields = b1.toJson()["fieldList"]
+      #   print("fields", fields)
+        for f in fields:
+            print("f", f)
+            self.assertEqual("DUG", fields[f]["condition"])
+
+    # 5 6
+    # 0 0 0 0 0 
+    # 0 0 0 0 0
+    # 0 0 0 0 0  # 2 2
+    # 0 0 0 1 1
+    # 1 2 1 2 B
+    # B 2 B 2 1
+
+    def test_dug_recursive_full(self):
+
+        file1 = os.path.join(__location__, 'boards/board7_1')
+        b1 = board.Board("any", file1)
+        
+        b1.dig(13)
+    #     fields = b1.toJson()["fieldList"]
+    #   #   print("fields", fields)
+    #     for f in fields:
+    #         print("f", f)
+    #         self.assertEqual("DUG", fields[f]["condition"])        
 
 #################
 
