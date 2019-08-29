@@ -25,7 +25,7 @@ class TestBoard(unittest.TestCase):
     def test_Field(self):
 
         f1 = field.Field(1, 4, False)
-        self.assertEqual("UNTOUCH",f1.get_condition())
+        self.assertEqual("UNTOUCH", f1.get_condition())
 
         f1Dict = f1.toJson()
 
@@ -312,7 +312,6 @@ class TestBoard(unittest.TestCase):
 
         answ2 = "- - - 1  \n" + "1 2 1 1  \n" + "         \n" + \
             "      1 1\n" + "1 2 1 3 -\n" + "- - - - -"
-        print("GOT FROM BOARD", b1.toString())
         self.assertEqual(answ2, b1.toString())
 
 #################

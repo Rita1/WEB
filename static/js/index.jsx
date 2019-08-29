@@ -222,6 +222,7 @@ class Game extends React.Component {
       cordX : 0,
       cordY: 0,
       fields: [],
+      oneTimeChecked: false,
     };
     
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
@@ -266,6 +267,9 @@ class Game extends React.Component {
         });
       }
     });
+    this.setState({
+      oneTimeChecked: true,
+    });
   }
 
   // Gets name, changes user name in state, passed to FORM
@@ -307,7 +311,9 @@ class Game extends React.Component {
 
   getDateCheckGameStatus() {
     console.log("Status check")
-    this.getData( { checkStart : true } )
+    if (! this.state.oneTimeChecked) {
+        this.getData( { checkStart : true } )
+    }    
   }
 
   render() {

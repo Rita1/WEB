@@ -42,9 +42,15 @@ describe("Active Users", function() {
         // Click
         cy.get('[id=1]').click()
         cy.get('[id=1]').contains('2')
+        // Click same button second time
+        cy.get('[id=1]').click()
+        cy.get('[id=1]').contains('2')
+
         // Click Bomb
         cy.get('[id=0]').click()
-        //cy.get('[id=1]').contains('1')
+        cy.get('[id=0]').contains('0')
+        cy.get('[id=5]').click()
+        cy.get('[id=5]').contains('0')
         // // Flag
         // cy.get('[id=0]').trigger('contextmenu')
         

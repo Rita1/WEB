@@ -15,7 +15,6 @@ class Board():
 
     def __init__(self, size, file1=False):
         
-        print("size", size)
         if not file1:
             if size == "small":
                 self.sizeX = Board.SMALL[0]
@@ -290,7 +289,7 @@ class Board():
         y = x_y[1]
 
         # 1. change field from isBomb to no Bomb
-        
+
         f = self.get_field(ind)
         f.setNotBomb()
 
@@ -318,7 +317,7 @@ class Board():
         return
 
     # change field status flag or deflag, depends on state
-    # Todo
+    # TODO
     def flag(self, index):
         pass
 

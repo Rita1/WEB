@@ -73,24 +73,24 @@ class Server():
         action = request.args.get('action')
         field_id = request.args.get('id')
 
-        # debug = False
-        # if request.args.get('debug'):
-        #     debug = True
-
         logout = False
         if request.args.get('logout'):
             logout = True
+            Server.calculate_users(user_name, user_cookie, logout)
+            answ = Server.toJson()
+            return Response(json.dumps(answ), mimetype='application/json')
 
         # If check status, return that game not started
-
+        print("Server.game", Server.game)
         if checkStatus and Server.game == '':
+            print("from checkStatus")
             answ_not_started = {"gameStarted": False}
-            # print("answer from server", answ_not_started)
+            # kartais neissivalo failiukas
+            Server.restart_server()
             return Response(json.dumps(answ_not_started), mimetype='application/json')
 
         # Start game if needed
         Server.getGame(size)
-        # print("Server game", Server.game)
         
         # Calculate users
 
