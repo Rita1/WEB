@@ -25,11 +25,10 @@ var $ = require('jquery');
 
 function Field(props) {
   var bnt_class = 'square';
-  var bombCount = ''
+  var bombCount = '';
   if (props.status.condition != 'UNTOUCH') {
     bnt_class = 'square-clicked';
     bombCount = props.status.bomb_count;
-    console.log("bnt_class", bnt_class);
   }
   return (
     <button id={props.i} className={bnt_class} onClick={props.onClick} onContextMenu={props.onContextMenu}>
@@ -187,7 +186,7 @@ class NameForm extends React.Component {
         {!this.state.isRegister && this.props.gameStarted && (
           <form onSubmit={this.handleSubmit}>
             <label>
-              Name:
+              User Name:
               <input name="userName" type="text" value={this.state.userName} onChange={this.handleChange} />
             </label>
             <br />

@@ -8,6 +8,7 @@
 # python -m pytest
 # npx cypress open
 #  https://realpython.com/the-ultimate-flask-front-end/
+# pytest -k  "debug"
 
 import json
 from datetime import datetime, timedelta
@@ -34,14 +35,19 @@ class Server():
     active_users = 0
     HOURS_OLD = 1
     debug = False
-    file1 = os.path.join(__location__, 'boards/board3')
+    file1 = os.path.join(__location__, 'tests/boards/board3')
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
-            data = request.get_json()
-            if data['restart']:
+            print("request, data, form", request, request.data, request.form)
+            # data = json.loads(request.data.decode())
+            restart = request.form.get('restart')
+            if restart:
                 Server.restart_server()
+            debug = request.form.get('debug')
+            if debug:
+                Server.debug = True
         return render_template('index.html')
     
     # Board : sizeX, sizeY, listof Fields
@@ -67,9 +73,9 @@ class Server():
         action = request.args.get('action')
         field_id = request.args.get('id')
 
-        debug = False
-        if request.args.get('debug'):
-            debug = True
+        # debug = False
+        # if request.args.get('debug'):
+        #     debug = True
 
         logout = False
         if request.args.get('logout'):
@@ -78,38 +84,47 @@ class Server():
         # If check status, return that game not started
 
         if checkStatus and Server.game == '':
-            answ_not_started = {"gameStarted" : False}
-            print("answer from server", answ_not_started)
+            answ_not_started = {"gameStarted": False}
+            # print("answer from server", answ_not_started)
             return Response(json.dumps(answ_not_started), mimetype='application/json')
 
         # Start game if needed
-        Server.getGame(size, debug)
-        print("Server game", Server.game)
+        Server.getGame(size)
+        # print("Server game", Server.game)
         
         # Calculate users
 
         Server.calculate_users(user_name, user_cookie, logout)
 
         # Dig
-
+        boom = False
         if action == 'dig':
-            print("Diging")
-            Server.game.dig(int (field_id))
+            f = Server.game.get_field(int (field_id))
+            if f.is_Bomb():
+                Server.game.dig_bomb(int (field_id))
+                print("Diging BOMB")
+                boom = True
+            else:
+                Server.game.dig(int (field_id))
+                print("DIG")
         if action == 'flag':
             Server.game.flag(int (field_id))
         
         # Return answer
         answ = Server.toJson()
-        print("Answer from server", answ)
+        if boom:
+            answ["gameOver"] = True
+        # print("Answer from server", answ)
         answ_json = json.dumps(answ)
 
         return Response(answ_json, mimetype='application/json')
     
-    def getGame(size, debug):
+    def getGame(size):
         
-        if not Server.game and debug:
+        # print("Server.game, size, debug", Server.game, size, debug)
+        if not Server.game and Server.debug:
             Server.restart_server()
-            Server.game = board.Board(size, debug)
+            Server.game = board.Board(size, Server.file1)
         if not Server.game:
             Server.game = board.Board(size)
         return Server.game
@@ -147,7 +162,7 @@ class Server():
                     buffer.write(line)
                     count += 1
 
-        if not found:  
+        if not found:
             if user_cookie and user_name:
                 time = datetime.now().timestamp()
                 str_to_write = user_cookie + ";" +  user_name + ";" + str(time) + "\n"
@@ -159,6 +174,7 @@ class Server():
         Server.active_users = count
 
     def restart_server():
+        print("Server restart!")
         if os.path.exists('users.txt'):
             open("users.txt", 'w').close()
         Server.game = ''
@@ -168,6 +184,7 @@ class Server():
         answ = {}
         # answ = {
         #     "userCount" : 2,
+        #     "gameOver" : True
         #     "board" : {
         #         "cordX" : 9,
         #         "cordY" : 9,

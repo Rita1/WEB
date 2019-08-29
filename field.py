@@ -49,3 +49,20 @@ class Field():
         myDict["condition"] = self.get_condition()
         myDict["bomb_count"] = self.getBombCount()
         return myDict
+
+    def toString(self):
+
+        msg = ''
+        if self.get_condition() == "FLAG":
+            msg = "F"
+            return msg
+        if self.get_condition() == 'DUG':
+            if self.getBombCount() == 0:
+                msg = " "
+                return msg
+            else:
+                msg = str(self.getBombCount())
+                return msg
+        else:
+            msg = "-"
+            return msg

@@ -7,7 +7,7 @@ describe("Active Users", function() {
     it("Active Users", function() {
         // restart server
 
-        cy.request('POST', '/', { restart: true })
+        cy.request({method: 'POST', url: '/', form : true, json : true, body: { 'restart': true}})
 
         // No users
         cy.visit('/')
@@ -34,16 +34,19 @@ describe("Active Users", function() {
 
     it("Push Button 1 user", function() {
 
-        cy.request('POST', '/', { restart: true, debug: true})
+        // cy.request('POST', '/', { 'restart': true })
+        cy.request({method: 'POST', url: '/', form : true, json : true, body: { 'restart': true, 'debug': true }})
         cy.visit('/')
-        // 1 user
         cy.get('[name=userName]').type('Jhon')
         cy.get('form').contains('Start Game').click({ force: true })
         // Click
         cy.get('[id=1]').click()
         cy.get('[id=1]').contains('2')
-        // Flag
-        cy.get('[id=0]').trigger('contextmenu')
+        // Click Bomb
+        cy.get('[id=0]').click()
+        //cy.get('[id=1]').contains('1')
+        // // Flag
+        // cy.get('[id=0]').trigger('contextmenu')
         
     })
 })

@@ -20,15 +20,15 @@ class Board():
             if size == "small":
                 self.sizeX = Board.SMALL[0]
                 self.sizeY = Board.SMALL[1]
-                print("small", self.sizeX, self.sizeY)
+                # print("small", self.sizeX, self.sizeY)
             elif size == "medium":
                 self.sizeX = Board.MEDIUM[0]
                 self.sizeY = Board.MEDIUM[1]
-                print("medium", self.sizeX, self.sizeY)
+                # print("medium", self.sizeX, self.sizeY)
             else:
                 self.sizeX = Board.LARGE[0]
                 self.sizeY = Board.LARGE[1]
-                print("large", self.sizeX, self.sizeY)
+                # print("large", self.sizeX, self.sizeY)
             new_board_fields = Board.get_new_fields(self.sizeX, self.sizeY)
             new_board_with_bombs = Board.set_bombs(new_board_fields, self.sizeX, self.sizeY)
             with_bombs_count = Board.count_bombs(new_board_with_bombs, self.sizeX, self.sizeY)
@@ -42,6 +42,7 @@ class Board():
         fieldList = []
         first_line = True
         index = 0
+        print("file1", file1)
         with open(file1, 'r') as to_read:
             for line in to_read:
                 if first_line:
@@ -196,7 +197,7 @@ class Board():
         else:
             # dig field
             toDig = todo.pop()
-            print("x, y, todo, visited, toDig", x, y, todo, visited, toDig)
+           # print("x, y, todo, visited, toDig", x, y, todo, visited, toDig)
             field = self.get_field(toDig)
             field.dig()
 
@@ -209,11 +210,11 @@ class Board():
             y = field.getY()
             if (field.getBombCount() == 0):
                 nextTodo = self.next_todo(x, y)
-                print("nextTodo", nextTodo)
+               # print("nextTodo", nextTodo)
             mergedTodo = self.merge(todo, nextTodo, visited)
 
             # repeat
-            print("repeat x, y, todo, visited, toDig", x, y, mergedTodo, visited, toDig)
+            # print("repeat x, y, todo, visited, toDig", x, y, mergedTodo, visited, toDig)
             self.digRec(x, y, mergedTodo, visited)
 
     # Generate next index'es which you should dig
@@ -277,6 +278,45 @@ class Board():
                     todo.append(next)
         return todo
     
+    # 1. change field from isBomb to no Bomb
+    # 2. change status to dug
+    # 3. recalculate related fields
+
+    def dig_bomb(self, ind):
+        cordX = self.sizeX
+        cordY = self.sizeY
+        x_y = Board.return_x_y(ind, cordX, cordY)
+        x = x_y[0]
+        y = x_y[1]
+
+        # 1. change field from isBomb to no Bomb
+        
+        f = self.get_field(ind)
+        f.setNotBomb()
+
+        # 2. Recalculate board
+	    # 2.0 Create counter
+        counter = []
+        for i in range(cordX * cordY):
+            counter.append(0)
+        
+        # 2.1 Calculate which fields need to change
+        count = Board.update_count(counter, f, cordX, cordY)
+        # 3 Update felds
+        for c in range(len(count)):
+            # print("c", c)
+            fieldToUpdate = self.get_field(c)
+            if (count[c] == 1) and (fieldToUpdate.getBombCount() > 0):
+                bombs = fieldToUpdate.getBombCount()
+                fieldToUpdate.setBombCount(bombs - 1)
+        # 4. dig recursive
+        todo = []
+        visited = []
+        todo.append(ind)
+        self.digRec(x, y, todo, visited)
+                 
+        return
+
     # change field status flag or deflag, depends on state
     # Todo
     def flag(self, index):
@@ -324,3 +364,20 @@ class Board():
             count += 1
         myDict["fieldList"] = fields_dict
         return myDict
+
+    def toString(self):
+
+        msg = ""
+        count = 0
+        for f in self.fields:
+            msg += f.toString()
+            count += 1
+            # except last line
+            if (count % self.sizeX == 0) and (count != (self.sizeX * self.sizeY)):
+                msg += "\n"
+            # last line add nothing    
+            elif (count == self.sizeX * self.sizeY):
+                msg += ""
+            else:
+                msg += " "     
+        return msg        

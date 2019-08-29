@@ -55,6 +55,19 @@ class TestBoard(unittest.TestCase):
         f1Dict2 = f1.toJson()
         self.assertEqual(2, f1Dict2["bomb_count"])
 
+    def test_field_string(self):
+        f1 = field.Field(2, 5, False)
+        self.assertEqual("-", f1.toString())
+
+        f1.flag()
+        self.assertEqual("F", f1.toString())
+
+        f1.dig()
+        self.assertEqual(" ", f1.toString())
+
+        f1.setBombCount(1)
+        self.assertEqual("1", f1.toString())
+
     def test_create_board(self):
 
         b1 = board.Board("small")
@@ -237,13 +250,19 @@ class TestBoard(unittest.TestCase):
 
         file1 = os.path.join(__location__, 'boards/board6')
         b1 = board.Board("any", file1)
-        
+
+        answ = "- - - -"
+        self.assertEqual(answ, b1.toString())
+
         b1.dig(0)
         fields = b1.toJson()["fieldList"]
       #   print("fields", fields)
         for f in fields:
             print("f", f)
             self.assertEqual("DUG", fields[f]["condition"])
+
+        answ = "       "
+        self.assertEqual(answ, b1.toString())
 
     # 5 6
     # 0 0 0 0 0 
@@ -258,12 +277,43 @@ class TestBoard(unittest.TestCase):
         file1 = os.path.join(__location__, 'boards/board7_1')
         b1 = board.Board("any", file1)
         
+        answ1 = "- - - - -\n" + "- - - - -\n" + "- - - - -\n" + "- - - - -\n"\
+             + "- - - - -\n" + "- - - - -"
+        self.assertEqual(answ1, b1.toString())
+
         b1.dig(13)
-    #     fields = b1.toJson()["fieldList"]
-    #   #   print("fields", fields)
-    #     for f in fields:
-    #         print("f", f)
-    #         self.assertEqual("DUG", fields[f]["condition"])        
+        answ2 = "         \n" + "         \n" + "         \n" + "      1 1\n"\
+            + "1 2 1 2 -\n" + "- - - - -"
+        self.assertEqual(answ2, b1.toString())
+
+    # 5 6
+    # B 2 B 1 0 
+    # 1 2 1 1 0
+    # 1 1 1 0 0
+    # 1 B 1 1 1 //<-
+    # 2 3 2 3 B
+    # B 2 B 3 B
+
+    def test_dig_bomb1(self):
+        file1 = os.path.join(__location__, 'boards/board3')
+        b1 = board.Board("any", file1)
+
+        b1.dig(9)
+        answ = "- - - 1  \n" + "- - 1 1  \n" + "- - 1    \n" \
+            + "- - 1 1 1\n" + "- - - - -\n" + "- - - - -"
+
+        self.assertEqual(answ, b1.toString())
+
+        b1.dig_bomb(16)
+
+        f1 = b1.get_field(16)
+        self.assertFalse(f1.is_Bomb())
+        self.assertEqual("DUG", f1.get_condition())
+
+        answ2 = "- - - 1  \n" + "1 2 1 1  \n" + "         \n" + \
+            "      1 1\n" + "1 2 1 3 -\n" + "- - - - -"
+        print("GOT FROM BOARD", b1.toString())
+        self.assertEqual(answ2, b1.toString())
 
 #################
 
