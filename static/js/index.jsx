@@ -311,7 +311,7 @@ class Game extends React.Component {
 
   getDateCheckGameStatus() {
     console.log("Status check")
-    if (! this.state.oneTimeChecked) {
+    if ( ! this.state.oneTimeChecked ) {
         this.getData( { checkStart : true } )
     }    
   }
