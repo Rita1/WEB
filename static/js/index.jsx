@@ -288,17 +288,17 @@ class Game extends React.Component {
 
   // Send Left and right click info to server
   handleClick (i) {
-    console.log("Handle click")
+    // console.log("Handle click")
     this.getData( { action : 'dig', id : i } )
   }
 
   handleRightClick(i) {
-    console.log("Right click")
+    // console.log("Right click")
     this.getData( { action : 'flag' } )
   }
   // Send to server, then window is closed
   handleUnload () {
-    console.log("Status unload")
+    // console.log("Status unload")
     this.getData( { logout : true } )
   } 
 
