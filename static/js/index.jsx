@@ -25,14 +25,17 @@ var $ = require('jquery');
 
 function Field(props) {
   var bnt_class = 'square';
-  var bombCount = '';
-  if (props.status.condition != 'UNTOUCH') {
+  var bState = '';
+  if  (props.status.condition == 'FLAG') {
+    bState = "F";
+  }
+  else if (props.status.condition != 'UNTOUCH') {
     bnt_class = 'square-clicked';
-    bombCount = props.status.bomb_count;
+    bState = props.status.bomb_count;
   }
   return (
     <button id={props.i} className={bnt_class} onClick={props.onClick} onContextMenu={props.onContextMenu}>
-      { bombCount }
+      { bState }
     </button>
   );
 }
@@ -82,7 +85,6 @@ class Board extends React.Component {
   
   return_index(x, y, CordX) {
     var index = (y * CordX) + x;
-    console.log("index x, y, CordX", x, y, CordX);
     return index
   }
 
@@ -164,7 +166,6 @@ class NameForm extends React.Component {
   render() {
     return (
       <div>
-        {this.state.isRegister && (<h2>Hello,  {this.state.userName}</h2>)}
         {!this.state.isRegister && !this.props.gameStarted && (
         <form onSubmit={this.handleSubmit}>
           <label>
@@ -198,6 +199,19 @@ class NameForm extends React.Component {
   }
 }
 
+class GameInfo extends React.Component {
+
+  render () {
+    return (
+      <div id="gameInfo">
+        {this.props.userName && (<h2>Hello,  {this.props.userName}</h2>)}
+        {this.props.gameOver && (<h1>BOOM!</h1>)}
+        <h2>Active Players: {this.props.userCount}</h2>
+      </div>
+    );
+  }
+}
+
 class Game extends React.Component {
     
   // 1. Choose size - buttons
@@ -217,6 +231,7 @@ class Game extends React.Component {
       userCookie: Cookies.get('cookie'),
       userName: '',
       gameStart: false,
+      gameOver: false,
       userCount : 0,
       size : "small",
       cordX : 0,
@@ -262,6 +277,11 @@ class Game extends React.Component {
             gameStart : true,
           });
         }
+        if (data.gameOver) {
+          this.setState({
+            gameOver : true,
+          });
+        }
         this.setState({
           userCount : data.userCount,
         });
@@ -294,7 +314,7 @@ class Game extends React.Component {
 
   handleRightClick(i) {
     // console.log("Right click")
-    this.getData( { action : 'flag' } )
+    this.getData( { action : 'flag', id : i } )
   }
   // Send to server, then window is closed
   handleUnload () {
@@ -325,9 +345,9 @@ class Game extends React.Component {
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="game-board" key={1}>
-          <h2>Active Players: {this.state.userCount}</h2>
+          <GameInfo gameOver={this.state.gameOver} userCount={this.state.userCount} userName={this.state.userName}/>
           <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-          {this.state.userName && (
+          {this.state.userName && (! this.state.gameOver) && (
           <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
             onClick={(x, y) => this.handleClick(x, y)} 
             onContextMenu={(x,y) => this.handleRightClick(x, y)}/>
@@ -343,5 +363,3 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
-// https://stackoverflow.com/questions/45069728/sending-api-call-before-page-reload-or-close-using-react?fbclid=IwAR3OA3o0T1Fs6Q-IWnkg3-jPrEkwfGxemXxkLBrq6CT6HqBQ6x5sWXHMCj0
-// https://stackoverflow.com/questions/147636/best-way-to-detect-when-a-user-leaves-a-web-page?fbclid=IwAR0E7kW7Tj2Sd5Q9hDKZR67kk_1CqP1Lxcm-D_Z1Thn6J47YaC8pJdFsxOQ

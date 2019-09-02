@@ -35,7 +35,7 @@ class Server():
     active_users = 0
     HOURS_OLD = 1
     debug = False
-    file1 = os.path.join(__location__, 'tests/boards/board3')
+    file1 = os.path.join(__location__, 'tests/boards/board3') # 3
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
@@ -76,6 +76,7 @@ class Server():
         logout = False
         if request.args.get('logout'):
             logout = True
+            print("from logout", user_name)
             Server.calculate_users(user_name, user_cookie, logout)
             answ = Server.toJson()
             return Response(json.dumps(answ), mimetype='application/json')
@@ -93,27 +94,30 @@ class Server():
         Server.getGame(size)
         
         # Calculate users
-
+        
         Server.calculate_users(user_name, user_cookie, logout)
-
+        
+        if field_id:
+            field_id = int (field_id)
+            f = Server.game.get_field(field_id)   
         # Dig
         boom = False
-        if action == 'dig':
-            f = Server.game.get_field(int (field_id))
+        if action == 'dig' and not f.get_condition() == "FLAG":
             if f.is_Bomb():
-                Server.game.dig_bomb(int (field_id))
-                print("Diging BOMB")
+                Server.game.dig_bomb(field_id)
                 boom = True
+                Server.calculate_users(user_name, user_cookie, True)
             else:
-                Server.game.dig(int (field_id))
-                print("DIG")
+                Server.game.dig(field_id)
+        # Flag-unflag        
         if action == 'flag':
-            Server.game.flag(int (field_id))
+            Server.game.flag(field_id)
         
         # Return answer
         answ = Server.toJson()
         if boom:
             answ["gameOver"] = True
+
         # print("Answer from server", answ)
         answ_json = json.dumps(answ)
 
@@ -137,6 +141,7 @@ class Server():
 
     def calculate_users(user_name, user_cookie, logout=False):
         
+        # print("user_name, cookie, logout", user_name, user_cookie, logout)
         buffer = io.StringIO()
         found = False
         count = 0
@@ -163,7 +168,7 @@ class Server():
                     count += 1
 
         if not found:
-            if user_cookie and user_name:
+            if user_cookie and user_name and not logout:
                 time = datetime.now().timestamp()
                 str_to_write = user_cookie + ";" +  user_name + ";" + str(time) + "\n"
                 buffer.write(str_to_write)
@@ -172,6 +177,7 @@ class Server():
             to_write.write(buffer.getvalue())
             buffer.flush()
         Server.active_users = count
+        # print("calculating users", Server.active_users)
 
     def restart_server():
         print("Server restart!")
@@ -210,7 +216,8 @@ class Server():
         answ["gameStarted"] = True
         user_count = Server.active_users
         answ["userCount"] = user_count
-        answ["board"] = Server.game.toJson()
+        if Server.game:
+            answ["board"] = Server.game.toJson()
         return answ
 
 

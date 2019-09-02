@@ -235,7 +235,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(2, y)
 
 
-    def test_dug_board(self):
+    def test_dig_board(self):
 
         file1 = os.path.join(__location__, 'boards/board4')
         b1 = board.Board("any", file1)
@@ -246,7 +246,7 @@ class TestBoard(unittest.TestCase):
         self.assertEqual("DUG", fl)
 
     # 0 0 0 0
-    def test_dug_recursive(self):
+    def test_dig_recursive(self):
 
         file1 = os.path.join(__location__, 'boards/board6')
         b1 = board.Board("any", file1)
@@ -272,7 +272,7 @@ class TestBoard(unittest.TestCase):
     # 1 2 1 2 B
     # B 2 B 2 1
 
-    def test_dug_recursive_full(self):
+    def test_dig_recursive_full(self):
 
         file1 = os.path.join(__location__, 'boards/board7_1')
         b1 = board.Board("any", file1)
@@ -309,10 +309,59 @@ class TestBoard(unittest.TestCase):
         f1 = b1.get_field(16)
         self.assertFalse(f1.is_Bomb())
         self.assertEqual("DUG", f1.get_condition())
+        self.assertEqual(0, f1.getBombCount())
+
+    # 5 6
+    # B 2 B 1 0 
+    # 1 2 1 1 0
+    # 0 0 0 0 0
+    # 0 0 0 1 1 //<-
+    # 1 2 1 3 B
+    # B 2 B 3 B
 
         answ2 = "- - - 1  \n" + "1 2 1 1  \n" + "         \n" + \
             "      1 1\n" + "1 2 1 3 -\n" + "- - - - -"
         self.assertEqual(answ2, b1.toString())
+
+        b1.dig_bomb(0)
+        f2 = b1.get_field(0)
+        self.assertFalse(f2.is_Bomb())
+        self.assertEqual("DUG", f2.get_condition())
+        self.assertEqual(0, f2.getBombCount())
+    # 5 6
+    # B 2 B 1 0 
+    # 1 2 1 1 0
+    # 0 0 0 0 0
+    # 0 0 0 1 1 //<-
+    # 1 2 1 3 B
+    # B 2 B 3 B
+    #   
+        answ3 = "  1 - 1  \n" + "  1 1 1  \n" + "         \n" + \
+            "      1 1\n" + "1 2 1 3 -\n" + "- - - - -"
+        print("b1.toString()", b1.toString())
+        print("b1.toJson()", b1.toJson())
+        self.assertEqual(answ3, b1.toString())
+
+# 0 0 0 0
+# 0 0 1 1
+# 0 1 2 B
+# 0 1 B 2
+# 0 1 1 1
+
+    def test_dig_bomb3(self):
+        file1 = os.path.join(__location__, 'boards/board8')
+        b1 = board.Board("any", file1)
+
+        b1.dig(0)
+
+        answ = "       \n" + "    1 1\n" + "  1 2 -\n" + "  1 - -\n" + "  1 - -"
+        # print("from board", b1.toString())
+        self.assertEqual(answ, b1.toString())
+        print("START DIG")
+        b1.dig_bomb(14)
+        print("DIG 14!", b1.toString())
+        answ1 = "       \n" + "    1 1\n" + "    1 -\n" + "    1 1\n" + "       "
+        self.assertEqual(answ1, b1.toString())
 
 #################
 

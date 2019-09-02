@@ -15,6 +15,7 @@ class Field():
 
     def setNotBomb(self):
         self.isBomb = False
+        # self.countBomb = 0
 
     def is_Bomb(self):
         bomb = self.isBomb
@@ -24,6 +25,7 @@ class Field():
         self.condition = "DUG"
 
     def flag(self):
+        print("flaging from field")
         self.condition = "FLAG"
 
     def unFlag(self):

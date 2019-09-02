@@ -45,14 +45,22 @@ describe("Active Users", function() {
         // Click same button second time
         cy.get('[id=1]').click()
         cy.get('[id=1]').contains('2')
+        // Flag
+        cy.get('[id=3]').trigger('contextmenu')
+        cy.get('[id=3]').contains('F')
+        // Don't let click of bomb
+        cy.get('[id=3]').click()
+        cy.get('[id=3]').contains('F')
+        // Unflag
+        cy.get('[id=3]').trigger('contextmenu')
+        cy.get('[id=3]').click()
+        cy.get('[id=3]').contains('1')
 
         // Click Bomb
         cy.get('[id=0]').click()
-        cy.get('[id=0]').contains('0')
-        cy.get('[id=5]').click()
-        cy.get('[id=5]').contains('0')
-        // // Flag
-        // cy.get('[id=0]').trigger('contextmenu')
+        cy.contains('BOOM!')
+        cy.contains('Active Players:')
+        cy.contains('0')
         
     })
 })

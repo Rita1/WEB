@@ -6,6 +6,8 @@
   "tests/test_board.py::TestBoard::test_create_board": true, 
   "tests/test_board.py::TestBoard::test_create_board2": true, 
   "tests/test_board.py::TestBoard::test_dig_bomb": true, 
+  "tests/test_board.py::TestBoard::test_dig_bomb1": true, 
+  "tests/test_board.py::TestBoard::test_dig_bomb3": true, 
   "tests/test_board.py::TestBoard::test_dug_board": true, 
   "tests/test_board.py::TestBoard::test_dug_recursive": true, 
   "tests/test_board.py::TestBoard::test_dug_recursive_full": true, 
@@ -14,5 +16,6 @@
   "tests/test_board.py::TestBoard::test_return_x_y": true, 
   "tests/test_server.py::TestServer::test_calculate_users": true, 
   "tests/test_server.py::TestServer::test_debug_mode": true, 
+  "tests/test_server.py::TestServer::test_dig_bomb2": true, 
   "tests/test_server.py::TestServer::test_old_user": true
 }

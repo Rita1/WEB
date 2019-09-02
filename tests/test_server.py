@@ -62,7 +62,7 @@ class TestServer(unittest.TestCase):
         self.assertEqual(1, answ4["userCount"])
 
         # new user logs in
-        answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905&logout=True").data
+        answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905").data
         answ6 = json.loads(answ6.decode())
         self.assertEqual(2, answ6["userCount"])
 
@@ -159,7 +159,30 @@ class TestServer(unittest.TestCase):
         self.assertEqual(1, f5["bomb_count"])
         self.assertEqual("UNTOUCH", f5["condition"])
 
+    def test_flag_unflag(self):
+        
+        data = {"restart": True, "debug": True}
+        self.client.post("/", data=data)
+        
+        # Flag
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=0").data
+        answ1 = json.loads(answ1.decode())
 
+        f1 = answ1["board"]["fieldList"]["0"]
+        self.assertEqual("FLAG", f1["condition"])
+        
+        # CLICK
+        answ10 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=0").data
+        answ10 = json.loads(answ10.decode())
+        f1 = answ1["board"]["fieldList"]["0"]
+        self.assertEqual("FLAG", f1["condition"])
+
+        # UNFLAG
+        answ2 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=0").data
+        answ2 = json.loads(answ2.decode())
+
+        f1 = answ2["board"]["fieldList"]["0"]
+        self.assertEqual("UNTOUCH", f1["condition"])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

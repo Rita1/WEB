@@ -191,12 +191,13 @@ class Board():
         self.digRec(x, y, todo, visited)
 
     def digRec(self, x, y, todo, visited):
+        # print("BF x, y, todo, visited", x, y, todo, visited)
         if not todo:
             return
         else:
             # dig field
             toDig = todo.pop()
-           # print("x, y, todo, visited, toDig", x, y, todo, visited, toDig)
+            # print("To dig", toDig)
             field = self.get_field(toDig)
             field.dig()
 
@@ -207,13 +208,13 @@ class Board():
             nextTodo = []
             x = field.getX()
             y = field.getY()
+            # print("Field to json", field.toJson())
             if (field.getBombCount() == 0):
                 nextTodo = self.next_todo(x, y)
-               # print("nextTodo", nextTodo)
             mergedTodo = self.merge(todo, nextTodo, visited)
 
             # repeat
-            # print("repeat x, y, todo, visited, toDig", x, y, mergedTodo, visited, toDig)
+            # print("After repeat x, y, mergedTodo, visited, toDig", x, y, mergedTodo, visited, toDig)
             self.digRec(x, y, mergedTodo, visited)
 
     # Generate next index'es which you should dig
@@ -298,9 +299,10 @@ class Board():
         counter = []
         for i in range(cordX * cordY):
             counter.append(0)
-        
+        # print("Counter len", len(counter))
         # 2.1 Calculate which fields need to change
         count = Board.update_count(counter, f, cordX, cordY)
+        todo = []
         # 3 Update felds
         for c in range(len(count)):
             # print("c", c)
@@ -308,8 +310,14 @@ class Board():
             if (count[c] == 1) and (fieldToUpdate.getBombCount() > 0):
                 bombs = fieldToUpdate.getBombCount()
                 fieldToUpdate.setBombCount(bombs - 1)
+                
+                # situs irgi reikia perkasti
+                if fieldToUpdate.getBombCount() == 0 and not fieldToUpdate.is_Bomb():
+                    # print("Which field is 0, after bomb index", c, fieldToUpdate.getBombCount())
+                    todo.append(c)
+
         # 4. dig recursive
-        todo = []
+        
         visited = []
         todo.append(ind)
         self.digRec(x, y, todo, visited)
@@ -317,9 +325,15 @@ class Board():
         return
 
     # change field status flag or deflag, depends on state
-    # TODO
+
     def flag(self, index):
-        pass
+        
+        f = self.get_field(index)
+        if f.get_condition() == "UNTOUCH":
+            print("flag, index", index)
+            f.flag()
+        elif f.get_condition() == "FLAG":
+            f.unFlag()
 
     # field index in board list, start from 0
     # return field by index
