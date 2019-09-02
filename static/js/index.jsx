@@ -52,7 +52,7 @@ class Board extends React.Component {
     var i = this.return_index(x, y, this.props.cordX);
     // console.log("Fields from board", this.props.fields);
     return <Field i={i} status={this.props.fields[i]} onClick={() => this.props.onClick(i)}
-    onContextMenu={() => this.props.onContextMenu(i)}/>;
+    onContextMenu={(e) => this.props.onContextMenu(e, i)}/>;
   }
 
   renderBoardCol(y) {
@@ -238,14 +238,20 @@ class Game extends React.Component {
       cordY: 0,
       fields: [],
       oneTimeChecked: false,
+      
     };
-    
+    // this.eventSource = new EventSource("board");
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
     this.getDateCheckGameStatus = this.getDateCheckGameStatus.bind(this);
     this.handleUnload = this.handleUnload.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleRightClick = this.handleRightClick.bind(this);
   }
+
+  // componentDidMount() {
+  //   this.eventSource.onmessage = e =>
+  //     console.log(e.data);
+  // }
 
   getData(toSend) {
     if (! toSend) {
@@ -312,11 +318,12 @@ class Game extends React.Component {
     this.getData( { action : 'dig', id : i } )
   }
 
-  handleRightClick(i) {
+  handleRightClick(e, i) {
     // console.log("Right click")
+    e.preventDefault();
     this.getData( { action : 'flag', id : i } )
   }
-  // Send to server, then window is closed
+  // Send to server, when window is closed
   handleUnload () {
     // console.log("Status unload")
     this.getData( { logout : true } )
@@ -339,9 +346,9 @@ class Game extends React.Component {
   render() {
     
     console.log("State from Game render",this.state);
-    if (! this.state.gameStart) {
-      this.getDateCheckGameStatus();
-    }
+    // if (! this.state.gameStart) {
+    //   this.getDateCheckGameStatus();
+    // }
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="game-board" key={1}>
@@ -363,3 +370,4 @@ ReactDOM.render(
   document.getElementById('root')
 );
 
+// https://auth0.com/blog/developing-real-time-web-applications-with-server-sent-events/
