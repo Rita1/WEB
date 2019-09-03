@@ -248,10 +248,13 @@ class Game extends React.Component {
     this.handleRightClick = this.handleRightClick.bind(this);
   }
 
-  // componentDidMount() {
+  componentDidMount() {
+    if (! this.state.gameStart) {
+       this.getDateCheckGameStatus();
+    }
   //   this.eventSource.onmessage = e =>
   //     console.log(e.data);
-  // }
+  }
 
   getData(toSend) {
     if (! toSend) {
