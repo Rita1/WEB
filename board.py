@@ -12,6 +12,13 @@ class Board():
     SMALL = (9,9)
     MEDIUM = (16,16)
     LARGE = (30,24)
+    instance_made = 0
+
+
+    def __new__(cls, *args, **kw):
+        cls.instance_made = cls.instance_made + 1
+        i = super(Board, cls).__new__(cls)
+        return i
 
     def __init__(self, size, file1=False):
         
