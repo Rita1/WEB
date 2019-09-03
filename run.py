@@ -214,6 +214,7 @@ class Server():
         # }
         
         answ["gameStarted"] = True
+        answ["ID"] = str( Server.game )
         user_count = Server.active_users
         answ["userCount"] = user_count
         if Server.game:

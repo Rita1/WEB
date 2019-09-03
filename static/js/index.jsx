@@ -270,6 +270,7 @@ class Game extends React.Component {
     fullData = Object.assign(toSend, fromState);
     $.get(window.location.href + 'board', fullData, (data) => {
       if (data) {
+        console.log(data)
         if (data.board) {
           if (data.board.fieldList){
             this.setState({
