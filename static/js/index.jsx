@@ -89,8 +89,6 @@ class Board extends React.Component {
   }
 
   render () {
-    console.log("CordX", this.props.cordX);
-    console.log("CordY", this.props.cordY);
     // https://revs.runtime-revolution.com/react-passing-data-between-components-with-pokemon-as-an-example-ac2b5ab59b26
     // https://codepen.io/gaearon/pen/aWWQOG?editors=0010
     return ( 
@@ -240,7 +238,8 @@ class Game extends React.Component {
       oneTimeChecked: false,
       
     };
-    // this.eventSource = new EventSource("board");
+
+    this.eventSource = new EventSource("stream");
     this.handleSubmitForm = this.handleSubmitForm.bind(this);
     this.getDateCheckGameStatus = this.getDateCheckGameStatus.bind(this);
     this.handleUnload = this.handleUnload.bind(this);
@@ -248,12 +247,19 @@ class Game extends React.Component {
     this.handleRightClick = this.handleRightClick.bind(this);
   }
 
+// https://www.jsdiaries.com/dynamic-website-design-with-event-source/
+// https://stackoverflow.com/questions/25860304/how-do-i-set-response-headers-in-flask
+// https://stackoverflow.com/questions/57241022/server-sent-events-not-receiving-messages-from-stream-with-react-and-nodejs
+
   componentDidMount() {
     if (! this.state.gameStart) {
        this.getDateCheckGameStatus();
     }
-  //   this.eventSource.onmessage = e =>
-  //     console.log(e.data);
+    console.log("from component did mountW");
+    this.eventSource.onmessage = e => {
+      console.log("kuku");
+      console.log("Updating data", e.data);
+    }
   }
 
   getData(toSend) {
@@ -270,7 +276,7 @@ class Game extends React.Component {
     fullData = Object.assign(toSend, fromState);
     $.get(window.location.href + 'board', fullData, (data) => {
       if (data) {
-        console.log(data)
+        //console.log(data)
         if (data.board) {
           if (data.board.fieldList){
             this.setState({
@@ -341,7 +347,7 @@ class Game extends React.Component {
   //   Liepiam registruotis, bet neduodam pasirinkti dydzio
 
   getDateCheckGameStatus() {
-    console.log("Status check")
+    // console.log("Status check")
     if ( ! this.state.oneTimeChecked ) {
         this.getData( { checkStart : true } )
     }    

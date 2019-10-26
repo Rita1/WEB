@@ -7,19 +7,19 @@
 # npm install jquery --save
 # python -m pytest
 # npx cypress open
-#  https://realpython.com/the-ultimate-flask-front-end/
 # pytest -k  "debug"
+# gunicorn run:app --worker-class gevent --bind 0.0.0.0:8000
 
 import json
 from datetime import datetime, timedelta
+import time
 import io
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, Response, stream_with_context
 try:
     from . import board
 except:
     import board
-from flask import Response
 
 
 # app = Flask(__name__,  template_folder='./static')
@@ -36,6 +36,8 @@ class Server():
     HOURS_OLD = 1
     debug = False
     file1 = os.path.join(__location__, 'tests/boards/board3') # 3
+    answ = 0
+    need_update = False
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
@@ -50,6 +52,23 @@ class Server():
                 Server.debug = True
         return render_template('index.html')
     
+
+
+    @app.route('/stream')
+    def stream():
+        def push_answ():
+            while True:
+                if Server.need_update == True:
+                    yield 'data'+': '+ str(Server.toJson())+'\n'+'\n'
+                    Server.answ += 1
+                    Server.need_update = False
+                Server.answ += 1
+                print("stream", Server.answ)
+
+        return Response(response=push_answ(), status=200, mimetype="text/plain", content_type="text/event-stream")
+
+# https://www.edureka.co/community/30828/how-do-you-add-a-background-thread-to-flask-in-python
+
     # Board : sizeX, sizeY, listof Fields
     # Size: Small 9 x 9, Medium 16 x 16, Large 30 x 24
     # Field : cordX, cordY, condition (Flag, DUG, Untouch), isBomb, BombCount
@@ -60,7 +79,6 @@ class Server():
     #   else return new Game
     # Calculate active users
     # 
-
     @app.route('/board')
     def handleGame():
 
@@ -120,7 +138,7 @@ class Server():
 
         # print("Answer from server", answ)
         answ_json = json.dumps(answ)
-
+    
         return Response(answ_json, mimetype='application/json')
     
     def getGame(size):
@@ -215,14 +233,18 @@ class Server():
         
         answ["gameStarted"] = True
         answ["ID"] = str( Server.game )
-        answ["Instance made"] = str( Server.game.instance_made )
         user_count = Server.active_users
         answ["userCount"] = user_count
         if Server.game:
             answ["board"] = Server.game.toJson()
+
+        # stream changes for all clients
+        print("Stream from handle game")
+        Server.need_update = True
         return answ
 
 
         
 if __name__ == "__main__":
-    app.run(host='0.0.0.0')
+    #  app.run(host='0.0.0.0', threaded=True,)
+    app.run(host='0.0.0.0', debug=True)
