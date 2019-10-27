@@ -42,7 +42,7 @@ class Server():
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
-            print("request, data, form", request, request.data, request.form)
+            # print("request, data, form", request, request.data, request.form)
             # data = json.loads(request.data.decode())
             restart = request.form.get('restart')
             if restart:
@@ -59,11 +59,11 @@ class Server():
         def push_answ():
             while True:
                 if Server.need_update == True:
-                    yield 'data'+': '+ str(Server.toJson())+'\n'+'\n'
+                    yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
                     Server.answ += 1
                     Server.need_update = False
                 Server.answ += 1
-                print("stream", Server.answ)
+                # print("stream", Server.answ)
 
         return Response(response=push_answ(), status=200, mimetype="text/plain", content_type="text/event-stream")
 
@@ -83,7 +83,7 @@ class Server():
     def handleGame():
 
         # Parse info
-        print("request.args", request.args)
+        # print("request.args", request.args)
         user_name = request.args.get('userName')
         user_cookie = request.args.get('userCookie')
         checkStatus = request.args.get("checkStart")
@@ -94,15 +94,15 @@ class Server():
         logout = False
         if request.args.get('logout'):
             logout = True
-            print("from logout", user_name)
+            # print("from logout", user_name)
             Server.calculate_users(user_name, user_cookie, logout)
             answ = Server.toJson()
             return Response(json.dumps(answ), mimetype='application/json')
 
         # If check status, return that game not started
-        print("Server.game", Server.game)
+        # print("Server.game", Server.game)
         if checkStatus and Server.game == '':
-            print("from checkStatus")
+            # print("from checkStatus")
             answ_not_started = {"gameStarted": False}
             # kartais neissivalo failiukas
             Server.restart_server()

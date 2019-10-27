@@ -255,12 +255,43 @@ class Game extends React.Component {
     if (! this.state.gameStart) {
        this.getDateCheckGameStatus();
     }
-    console.log("from component did mountW");
     this.eventSource.onmessage = e => {
-      console.log("kuku");
-      console.log("Updating data", e.data);
+      var data = $.parseJSON(e.data)
+      this.processData(data)
     }
   }
+
+  processData(data) {
+    if (data) {
+      if (data.board) {
+        if (data.board.fieldList){
+          this.setState({
+            fields : data.board.fieldList
+          });
+        }
+        this.setState({
+          cordX : data.board.cordX,
+          cordY : data.board.cordY,
+        });
+      }
+      if (data.gameStarted) {
+        this.setState({
+          gameStart : true,
+        });
+      }
+      if (data.gameOver) {
+        this.setState({
+          gameOver : true,
+        });
+      }
+      this.setState({
+        userCount : data.userCount,
+      });
+    }
+  this.setState({
+    oneTimeChecked: true,
+  });
+};
 
   getData(toSend) {
     if (! toSend) {
@@ -275,36 +306,7 @@ class Game extends React.Component {
 
     fullData = Object.assign(toSend, fromState);
     $.get(window.location.href + 'board', fullData, (data) => {
-      if (data) {
-        //console.log(data)
-        if (data.board) {
-          if (data.board.fieldList){
-            this.setState({
-              fields : data.board.fieldList
-            });
-          }
-          this.setState({
-            cordX : data.board.cordX,
-            cordY : data.board.cordY,
-          });
-        }
-        if (data.gameStarted) {
-          this.setState({
-            gameStart : true,
-          });
-        }
-        if (data.gameOver) {
-          this.setState({
-            gameOver : true,
-          });
-        }
-        this.setState({
-          userCount : data.userCount,
-        });
-      }
-    });
-    this.setState({
-      oneTimeChecked: true,
+      this.processData(data);
     });
   }
 
