@@ -1,6 +1,7 @@
 module.exports = {
+
   // 1
-  entry: __dirname + '/static/js/index.jsx',
+  entry: ['babel-polyfill', __dirname + '/static/js/index.jsx'],
   module: {
     rules: [
       {

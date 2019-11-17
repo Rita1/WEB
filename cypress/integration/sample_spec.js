@@ -63,4 +63,21 @@ describe("Active Users", function() {
         cy.contains('0')
         
     })
+
+    it("Multi users", function() {
+        // restart server to debug mode
+
+        cy.request({method: 'POST', url: '/', form : true, json : true, body: { 'restart': true, 'debug': true }})
+        cy.visit('/')
+
+        // 1 user
+        cy.get('[name=userName]').type('Jhon')
+        cy.get('form').contains('Start Game').click({ force: true })
+        // 2 user
+        cy.request('/board?action=dig&id=0&userCookie=6032&userName=DrWho&size=small')
+
+        cy.wait(2000)
+        cy.get('[id=1]').contains('1')    
+
+    })
 })

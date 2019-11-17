@@ -338,8 +338,8 @@ class TestBoard(unittest.TestCase):
     #   
         answ3 = "  1 - 1  \n" + "  1 1 1  \n" + "         \n" + \
             "      1 1\n" + "1 2 1 3 -\n" + "- - - - -"
-        print("b1.toString()", b1.toString())
-        print("b1.toJson()", b1.toJson())
+        # print("b1.toString()", b1.toString())
+        # print("b1.toJson()", b1.toJson())
         self.assertEqual(answ3, b1.toString())
 
 # 0 0 0 0
@@ -357,13 +357,49 @@ class TestBoard(unittest.TestCase):
         answ = "       \n" + "    1 1\n" + "  1 2 -\n" + "  1 - -\n" + "  1 - -"
         # print("from board", b1.toString())
         self.assertEqual(answ, b1.toString())
-        print("START DIG")
+        # print("START DIG")
         b1.dig_bomb(14)
-        print("DIG 14!", b1.toString())
+        # print("DIG 14!", b1.toString())
         answ1 = "       \n" + "    1 1\n" + "    1 -\n" + "    1 1\n" + "       "
         self.assertEqual(answ1, b1.toString())
 
-#################
+    # B 1 0
+    # 1 1 0
+    def test_win_board(self):
+
+        file1 = os.path.join(__location__, 'boards/board4')
+        b1 = board.Board("any", file1)
+
+        gameWin = b1.toJson()["gameWin"]
+        self.assertFalse(gameWin)
+        
+        b1.dig(2)
+        gameWin1 = b1.toJson()["gameWin"]
+        self.assertFalse(gameWin1)
+        b1.dig(3)
+        b1.dig(4)
+        b1.dig(5)
+        gameWin2 = b1.toJson()["gameWin"]
+        self.assertFalse(gameWin2)
+        b1.flag(0)
+        gameWin3 = b1.toJson()["gameWin"]
+        self.assertTrue(gameWin3)
+        
+    # B 1 0
+    # 1 1 0
+    def test_win_board2(self):
+
+        file1 = os.path.join(__location__, 'boards/board4')
+        b1 = board.Board("any", file1)
+        
+        gameWin = b1.toJson()["gameWin"]
+        self.assertFalse(gameWin)
+        
+        b1.dig(5)
+        b1.dig_bomb(0)
+        gameWin1 = b1.toJson()["gameWin"]
+        print("b1.toJson, gameWin", gameWin, b1.toJson())
+        self.assertTrue(gameWin1)
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

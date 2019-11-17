@@ -1,6 +1,4 @@
-// npm run watch
-// source env/bin/activate
-// export FLASK_APP=run.py
+
 // https://github.com/angineering/fullstacktemplate
 // https://www.youtube.com/watch?v=TKIHpoF8ZIk&feature=share&fbclid=IwAR16_T8Q-RhHQvxVGmCzlZgBlapyjDDU-1BZZaYJAe9rvrupmZUwGYf2HMU
 // https://www.robinwieruch.de/webpack-babel-setup-tutorial/
@@ -41,16 +39,54 @@ function Field(props) {
 }
 
 // https://stackoverflow.com/questions/41978408/changing-style-of-a-button-on-click
+// https://developmentarc.gitbooks.io/react-indepth/content/life_cycle/birth/component_render.html
+// https://stackoverflow.com/questions/33075063/what-is-the-exact-usage-of-componentwillupdate-in-reactjs/33075514#33075514
+  // After bom, shows boom and sleeps 3 second
+  // https://stackoverflow.com/questions/30803440/delayed-rendering-of-react-components
 
 class Board extends React.Component {
 
   constructor(props) {
     super(props);
+    this.state = {
+      hidden : true,
+      wait : 3000,
+    }  
+  }
+
+  show() {
+    this.setState({hidden : false});
+  }
+
+  componentWillMount() {
+    var that = this;
+    if (this.props.gameOver === true) {
+      setTimeout(function() {
+        that.show();
+      }, this.state.wait);
+    }
+    else {
+      this.setState({hidden : false});
+    }
+  }
+
+  componentWillReceiveProps(nextProps){
+    if (nextProps.gameOver === true){
+      this.setState({hidden : true})
+    }
+  }
+
+  componentWillUpdate(newProps,newState) {
+    var that = this;
+    if (this.props.gameOver === true) {
+      setTimeout(function() {
+        that.show();
+      }, this.state.wait);
+    }
   }
 
   renderField(x, y) {
     var i = this.return_index(x, y, this.props.cordX);
-    // console.log("Fields from board", this.props.fields);
     return <Field i={i} status={this.props.fields[i]} onClick={() => this.props.onClick(i)}
     onContextMenu={(e) => this.props.onContextMenu(e, i)}/>;
   }
@@ -91,10 +127,12 @@ class Board extends React.Component {
   render () {
     // https://revs.runtime-revolution.com/react-passing-data-between-components-with-pokemon-as-an-example-ac2b5ab59b26
     // https://codepen.io/gaearon/pen/aWWQOG?editors=0010
-    return ( 
+    return (
+      
       <div>
-        {this.renderBoardLines()}
-      </div>
+        {this.state.hidden && (<h1>BOOM!!!</h1>)}
+        {!this.state.hidden && (this.renderBoardLines())}
+      </div>  
     );
   }
 }
@@ -104,7 +142,7 @@ class NameForm extends React.Component {
   // user name
   // isRegister true if pressed StartGame
   // size: Small, Medium, Large
-  // TODO user name, size
+
   constructor(props) {
     super(props);
     this.state = {
@@ -146,13 +184,6 @@ class NameForm extends React.Component {
     event.preventDefault();
   }
 
-  // setCookie() {
-  //   console.log("SetCookie");
-  //   var today = new Date();
-  //   Cookies.set('cookie', today);
-  //   console.log("Cookies.get('cookie'),", Cookies.get('cookie'));
-  // }
-
   // Enter name
   // Select size
   // Submit - Start game
@@ -192,6 +223,20 @@ class NameForm extends React.Component {
             <input type="submit" value="Start Game" />
           </form>
         )}
+        {this.state.isRegister && !this.props.gameStarted && (
+          <form onSubmit={this.handleSubmit}>
+            <label>
+              Select size:
+              <select name="size" value={this.state.size} onChange={this.handleChange}>
+                <option value="small">Small</option>
+                <option value="medium">Medium</option>
+                <option value="large">Large</option>
+              </select>
+              </label>
+              <br />
+              <input type="submit" value="Start Game" />
+          </form>
+        )}
       </div>
     );
   }
@@ -199,19 +244,27 @@ class NameForm extends React.Component {
 
 class GameInfo extends React.Component {
 
-  render () {
+
+ render () {
     return (
       <div id="gameInfo">
         {this.props.userName && (<h2>Hello,  {this.props.userName}</h2>)}
-        {this.props.gameOver && (<h1>BOOM!</h1>)}
+        {(<button onClick={this.props.onClickRestart}>
+            Restart Game
+          </button>)} 
         <h2>Active Players: {this.props.userCount}</h2>
       </div>
     );
   }
 }
 
+// {this.props.gameWin && 
+//   (<button onClick={this.props.onClickRestart}>
+//     Restart Game
+//   </button>)} 
+
 class Game extends React.Component {
-    
+  // 
   // 1. Choose size - buttons
   //     pass size to board functions
   // 2. Create board by what size
@@ -230,12 +283,14 @@ class Game extends React.Component {
       userName: '',
       gameStart: false,
       gameOver: false,
+      hidden: "hidden",
       userCount : 0,
       size : "small",
       cordX : 0,
       cordY: 0,
       fields: [],
       oneTimeChecked: false,
+      gameWin: false,
       
     };
 
@@ -245,6 +300,7 @@ class Game extends React.Component {
     this.handleUnload = this.handleUnload.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleRightClick = this.handleRightClick.bind(this);
+    this.onClickRestart = this.onClickRestart.bind(this);
   }
 
 // https://www.jsdiaries.com/dynamic-website-design-with-event-source/
@@ -274,6 +330,12 @@ class Game extends React.Component {
           cordY : data.board.cordY,
         });
       }
+      if (!data.board) {
+        this.setState({
+          gameStart : false,
+          // fields : [],
+        })
+      }
       if (data.gameStarted) {
         this.setState({
           gameStart : true,
@@ -282,6 +344,16 @@ class Game extends React.Component {
       if (data.gameOver) {
         this.setState({
           gameOver : true,
+        });
+      }
+      if (!data.gameOver) {
+        this.setState({
+          gameOver : false,
+        });
+      }
+      if (data.board && data.board.gameWin) {
+        this.setState({
+          gameWin : data.board.gameWin,
         });
       }
       this.setState({
@@ -355,22 +427,25 @@ class Game extends React.Component {
     }    
   }
 
+  onClickRestart() {
+    this.getData( { restart : true } )
+  }
+
   render() {
     
-    console.log("State from Game render",this.state);
-    // if (! this.state.gameStart) {
-    //   this.getDateCheckGameStatus();
-    // }
+    // console.log("State from Game render",this.state);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="game-board" key={1}>
-          <GameInfo gameOver={this.state.gameOver} userCount={this.state.userCount} userName={this.state.userName}/>
+          <GameInfo userCount={this.state.userCount} userName={this.state.userName} gameWin={this.state.gameWin}
+            onClickRestart={() => this.onClickRestart()}/>
           <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-          {this.state.userName && (! this.state.gameOver) && (
-          <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
-            onClick={(x, y) => this.handleClick(x, y)} 
-            onContextMenu={(x,y) => this.handleRightClick(x, y)}/>
-          )}
+          {this.state.userName && this.state.gameStart && (
+            <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
+              onClick={(x, y) => this.handleClick(x, y)} 
+              onContextMenu={(x,y) => this.handleRightClick(x, y)}
+              gameOver={this.state.gameOver}/>
+            )}
         </div>
       </Beforeunload>
     );
@@ -381,5 +456,4 @@ ReactDOM.render(
     <Game />,
   document.getElementById('root')
 );
-
 // https://auth0.com/blog/developing-real-time-web-applications-with-server-sent-events/

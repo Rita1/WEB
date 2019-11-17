@@ -8,6 +8,7 @@ from datetime import datetime, timedelta
 from .. import field
 from .. import board
 from .. import run
+from .. import user
 
 # try:
 #     #  sys.path.append("..")
@@ -20,19 +21,25 @@ from .. import run
 #     # from .. import board
 #     # from .. import run
 
+
 class TestServer(unittest.TestCase):
 
     def setUp(self):
         
-        # print("os.getcwd()", os.getcwd())
-        # print("os.path.dirname(path) ", os.path.dirname())
+        # OLD
         open("users.txt", 'a').close()
 
         run.app.config["TESTING"] = True
         self.client = run.app.test_client()
+        # data = {"restart": True}
+        # self.client.post("/", data=data)
 
     def tearDown(self):
+        # OLD
         os.remove("users.txt")
+
+        # data = {"restart": True}
+        # self.client.post("/", data=data)
 
     def test_calculate_users(self):
         
@@ -40,31 +47,35 @@ class TestServer(unittest.TestCase):
         answ0 = self.client.get("/board").data
         answ0 = json.loads(answ0.decode())
         self.assertEqual(0, answ0["userCount"])
+        self.assertFalse(answ0["users"])
 
         # 1 users
         answ1 = self.client.get("/board?userName=xsa&size=small&userCookie=9685").data
         answ1 = json.loads(answ1.decode())
         self.assertEqual(1, answ1["userCount"])
+        self.assertEqual("xsa", answ1["users"]["9685"]["username"])
+
 
         # 2 users
         answ2 = self.client.get("/board?userName=xsa&size=small&userCookie=1005").data
         answ2 = json.loads(answ2.decode())
         self.assertEqual(2, answ2["userCount"])
+        self.assertEqual("xsa", answ2["users"]["1005"]["username"])
 
-        # same user
+        # # same user
         answ3 = self.client.get("/board?userName=xsa&size=small&userCookie=9685").data
         answ3 = json.loads(answ3.decode())
         self.assertEqual(2, answ3["userCount"])
 
-        # 1 user logs out
-        answ4 = self.client.get("/board?userName=xsa&size=small&userCookie=9685&logout=True").data
-        answ4 = json.loads(answ4.decode())
-        self.assertEqual(1, answ4["userCount"])
+        # # 1 user logs out
+        # answ4 = self.client.get("/board?userName=xsa&size=small&userCookie=9685&logout=True").data
+        # answ4 = json.loads(answ4.decode())
+        # self.assertEqual(1, answ4["userCount"])
 
-        # new user logs in
-        answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905").data
-        answ6 = json.loads(answ6.decode())
-        self.assertEqual(2, answ6["userCount"])
+        # # new user logs in
+        # answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905").data
+        # answ6 = json.loads(answ6.decode())
+        # self.assertEqual(2, answ6["userCount"])
 
     # TODO - patikrinti ar teisingas user name
 
@@ -138,6 +149,7 @@ class TestServer(unittest.TestCase):
         answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=0").data
         answ1 = json.loads(answ1.decode())
         self.assertEqual(True, answ1["gameOver"])
+        self.assertFalse(answ1["board"]["gameWin"])
         
         f1 = answ1["board"]["fieldList"]["0"]
         self.assertEqual(0, f1["bomb_count"])
@@ -183,6 +195,31 @@ class TestServer(unittest.TestCase):
 
         f1 = answ2["board"]["fieldList"]["0"]
         self.assertEqual("UNTOUCH", f1["condition"])
+
+    def test_restart_server(self):
+
+        #Restart
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&restart=True").data
+        answ1 = json.loads(answ1.decode())
+        # print("answ1", answ1)
+        self.assertFalse(answ1["gameStarted"])
+        self.assertTrue("board" not in answ1)
+        # # Push button and restart
+        # Register
+        answ2 = self.client.get("/board?userName=xsa&size=small&userCookie=9685").data
+        answ2 = json.loads(answ2.decode())
+
+        self.assertTrue(answ2["gameStarted"])
+        self.assertTrue(answ2["board"])
+        # Push button
+        self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=0")
+        # Restart
+        answ3 = self.client.get("/board?userName=Ali&userCookie=1000&restart=True").data
+        answ3 = json.loads(answ3.decode())
+
+        self.assertFalse(answ3["gameStarted"])
+        self.assertTrue("board" not in answ3)
+
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -15,11 +15,13 @@ from datetime import datetime, timedelta
 import time
 import io
 import os
-from flask import Flask, render_template, request, Response, stream_with_context
+from flask import Flask, render_template, request, Response
 try:
     from . import board
+    from . import user
 except:
     import board
+    import user
 
 
 # app = Flask(__name__,  template_folder='./static')
@@ -31,13 +33,19 @@ __location__ = os.path.realpath(
 
 class Server():
 
+# board'o desineje saugoma lentele su useriais ir ju taskais
+# uz kiekviena atidaryta arba uzymeta veliavyte langeli gauni po taska
+# laimi tas kuris zaidimo pabaigoje (gameWin) turi daugiausia tasku
+# lentele isrikiuojama pagal daugiausiai turinti tasku zaideja
+
     game = ''
     active_users = 0
     HOURS_OLD = 1
     debug = False
     file1 = os.path.join(__location__, 'tests/boards/board3') # 3
-    answ = 0
     need_update = False
+    users = []
+    # users = [user_id, user_id, user_id]
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
@@ -58,16 +66,13 @@ class Server():
     def stream():
         def push_answ():
             while True:
+                time.sleep(1)
                 if Server.need_update == True:
                     yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
-                    Server.answ += 1
                     Server.need_update = False
-                Server.answ += 1
-                # print("stream", Server.answ)
+                    print("stream answ")
 
         return Response(response=push_answ(), status=200, mimetype="text/plain", content_type="text/event-stream")
-
-# https://www.edureka.co/community/30828/how-do-you-add-a-background-thread-to-flask-in-python
 
     # Board : sizeX, sizeY, listof Fields
     # Size: Small 9 x 9, Medium 16 x 16, Large 30 x 24
@@ -83,30 +88,30 @@ class Server():
     def handleGame():
 
         # Parse info
-        # print("request.args", request.args)
+        print("request.args", request.args)
         user_name = request.args.get('userName')
         user_cookie = request.args.get('userCookie')
         checkStatus = request.args.get("checkStart")
         size = request.args.get('size')
         action = request.args.get('action')
         field_id = request.args.get('id')
+        logout = request.args.get('logout') or False
+        restart = request.args.get('restart') or False
 
-        logout = False
-        if request.args.get('logout'):
-            logout = True
-            # print("from logout", user_name)
+        if logout:
+            #  print("from logout", user_name)
             Server.calculate_users(user_name, user_cookie, logout)
             answ = Server.toJson()
             return Response(json.dumps(answ), mimetype='application/json')
-
+       
         # If check status, return that game not started
         # print("Server.game", Server.game)
-        if checkStatus and Server.game == '':
-            # print("from checkStatus")
-            answ_not_started = {"gameStarted": False}
+        if (checkStatus and Server.game == ''):
             # kartais neissivalo failiukas
             Server.restart_server()
-            return Response(json.dumps(answ_not_started), mimetype='application/json')
+            answ = Server.toJson()
+            
+            return Response(json.dumps(answ), mimetype='application/json')
 
         # Start game if needed
         Server.getGame(size)
@@ -124,21 +129,23 @@ class Server():
             if f.is_Bomb():
                 Server.game.dig_bomb(field_id)
                 boom = True
-                Server.calculate_users(user_name, user_cookie, True)
+                Server.calculate_users(user_name, user_cookie, False)
             else:
                 Server.game.dig(field_id)
         # Flag-unflag        
         if action == 'flag':
             Server.game.flag(field_id)
-        
+        # Restart server
+        print("restart", restart)
+        if restart:
+            Server.restart_game()
         # Return answer
         answ = Server.toJson()
         if boom:
             answ["gameOver"] = True
 
-        # print("Answer from server", answ)
         answ_json = json.dumps(answ)
-    
+        print("answ_json", answ_json)
         return Response(answ_json, mimetype='application/json')
     
     def getGame(size):
@@ -159,7 +166,8 @@ class Server():
 
     def calculate_users(user_name, user_cookie, logout=False):
         
-        # print("user_name, cookie, logout", user_name, user_cookie, logout)
+        print("user_name, cookie, logout", user_name, user_cookie, logout)
+        print("USERS CALCULATING STARTED")
         buffer = io.StringIO()
         found = False
         count = 0
@@ -194,24 +202,74 @@ class Server():
         with open('users.txt', 'w') as to_write:
             to_write.write(buffer.getvalue())
             buffer.flush()
-        Server.active_users = count
-        # print("calculating users", Server.active_users)
 
+        # NEW 
+        # found = False
+        # if user_cookie:
+        #     print("USERS CALC user_cookie", Server.users)
+        #     
+
+        #     for u in Server.users:
+        #         print("USERS CALC for u", Server.users)
+        #         u_cookie = u.return_cookie()
+        #         u_timestamp = u.return_timestamp()
+        #         if u_cookie == user_cookie and logout:
+        #             found = True
+        #         elif u_cookie == user_cookie:
+        #             found = True
+        #             if u_timestamp > t1:
+        #                 #! Server.users.append(u)
+        #         elif u_timestamp > t1:
+        #             #! Server.users.append(u)
+
+        if user_cookie and user_name and not logout:
+            # time = datetime.now().timestamp()
+            u = user.User(user_name, user_cookie)
+            Server.users.append(u)
+
+        # print("U", u)
+        
+        Server.active_users = len(Server.users)
+        print("USERS CALCULATING END")
+        # print("calculating users", Server.active_users)
+    
+    def users_info():
+        print("USERS INFO STARTED")
+        myDict = {}
+        for u in Server.users:
+            myDict[u.return_cookie()] = u.get_info()
+        print("USERS INFO END", myDict)    
+        return myDict
+        
     def restart_server():
         print("Server restart!")
         if os.path.exists('users.txt'):
             open("users.txt", 'w').close()
+        # Server.users = []    
         Server.game = ''
         Server.active_users = 0
+
+    def restart_game():
+        print("Game restart!")
+        Server.game = '' 
 
     def toJson():
         answ = {}
         # answ = {
         #     "userCount" : 2,
+        #     "users" : {
+        #        cookie : {
+        #          "username" : "Petras",
+        #          "flaged_qty" : 0,
+        #          "digged_qty " : 0,
+        #          "total_qty" : 0,
+        #        }
+        #      }
         #     "gameOver" : True
         #     "board" : {
         #         "cordX" : 9,
         #         "cordY" : 9,
+        #         "gameWin" : False
         #         "fieldList" : {
         #             0 : {
         #                 "cordX" : 0,
@@ -230,16 +288,19 @@ class Server():
         #         }
         #     },
         # }
-        
-        answ["gameStarted"] = True
-        answ["ID"] = str( Server.game )
+           
+        answ["gameStarted"] = False
+        answ["gameOver"] = False
+        answ["ID"] = str(Server.game)
         user_count = Server.active_users
         answ["userCount"] = user_count
+        # answ["users"] = Server.users.getInfo()
+        answ["users"] = Server.users_info()
         if Server.game:
+            answ["gameStarted"] = True
             answ["board"] = Server.game.toJson()
 
         # stream changes for all clients
-        print("Stream from handle game")
         Server.need_update = True
         return answ
 

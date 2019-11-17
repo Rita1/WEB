@@ -12,16 +12,10 @@ class Board():
     SMALL = (9,9)
     MEDIUM = (16,16)
     LARGE = (30,24)
-    instance_made = 0
-
-
-    def __new__(cls, *args, **kw):
-        cls.instance_made = cls.instance_made + 1
-        i = super(Board, cls).__new__(cls)
-        return i
 
     def __init__(self, size, file1=False):
         
+        self.gameWin = False
         if not file1:
             if size == "small":
                 self.sizeX = Board.SMALL[0]
@@ -178,6 +172,16 @@ class Board():
             counter[indexLU] = bombCount + 1
         return counter
 
+    # returns self.gameWin = True if all fields doen't have state UNTOUCH
+    def checkIfWin(self):
+        win = True
+        for f in self.fields:
+            if f.get_condition() == "UNTOUCH":
+                win = False
+        if win:
+            self.gameWin = True
+        return
+
     # Dig square and all related squares, where bomb count = 0
     # first square cord x
     # first square cord y
@@ -196,6 +200,8 @@ class Board():
         visited = []
         todo.append(index)
         self.digRec(x, y, todo, visited)
+        # Check if board is wined
+        self.checkIfWin()
 
     def digRec(self, x, y, todo, visited):
         # print("BF x, y, todo, visited", x, y, todo, visited)
@@ -328,7 +334,8 @@ class Board():
         visited = []
         todo.append(ind)
         self.digRec(x, y, todo, visited)
-                 
+        self.checkIfWin()
+
         return
 
     # change field status flag or deflag, depends on state
@@ -341,6 +348,7 @@ class Board():
             f.flag()
         elif f.get_condition() == "FLAG":
             f.unFlag()
+        self.checkIfWin()    
 
     # field index in board list, start from 0
     # return field by index
@@ -374,6 +382,7 @@ class Board():
     def toJson(self):
 
         myDict = {}
+        myDict["gameWin"] = self.gameWin
         myDict["cordX"] = self.sizeX
         myDict["cordY"] = self.sizeY
         
