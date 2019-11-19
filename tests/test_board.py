@@ -234,16 +234,18 @@ class TestBoard(unittest.TestCase):
         self.assertEqual(2, x)
         self.assertEqual(2, y)
 
-
+    # 1 0 0
+    # 0 0 0
     def test_dig_board(self):
 
         file1 = os.path.join(__location__, 'boards/board4')
         b1 = board.Board("any", file1)
         
-        b1.dig(5)
+        qty1 = b1.dig(5)
         b1Dict = b1.toJson()
         fl = b1Dict["fieldList"][5]["condition"]
         self.assertEqual("DUG", fl)
+        self.assertEqual(4, qty1)
 
     # 0 0 0 0
     def test_dig_recursive(self):
@@ -254,7 +256,7 @@ class TestBoard(unittest.TestCase):
         answ = "- - - -"
         self.assertEqual(answ, b1.toString())
 
-        b1.dig(0)
+        qty1 = b1.dig(0)
         fields = b1.toJson()["fieldList"]
       #   print("fields", fields)
         for f in fields:
@@ -263,6 +265,7 @@ class TestBoard(unittest.TestCase):
 
         answ = "       "
         self.assertEqual(answ, b1.toString())
+        self.assertEqual(4, qty1)
 
     # 5 6
     # 0 0 0 0 0 
@@ -281,10 +284,11 @@ class TestBoard(unittest.TestCase):
              + "- - - - -\n" + "- - - - -"
         self.assertEqual(answ1, b1.toString())
 
-        b1.dig(13)
+        qty1 = b1.dig(13)
         answ2 = "         \n" + "         \n" + "         \n" + "      1 1\n"\
             + "1 2 1 2 -\n" + "- - - - -"
         self.assertEqual(answ2, b1.toString())
+        self.assertEqual(24, qty1)
 
     # 5 6
     # B 2 B 1 0 
@@ -298,11 +302,12 @@ class TestBoard(unittest.TestCase):
         file1 = os.path.join(__location__, 'boards/board3')
         b1 = board.Board("any", file1)
 
-        b1.dig(9)
+        qty1 = b1.dig(9)
         answ = "- - - 1  \n" + "- - 1 1  \n" + "- - 1    \n" \
             + "- - 1 1 1\n" + "- - - - -\n" + "- - - - -"
 
         self.assertEqual(answ, b1.toString())
+        self.assertEqual(11, qty1)
 
         b1.dig_bomb(16)
 

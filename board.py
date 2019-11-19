@@ -195,25 +195,28 @@ class Board():
         x_y = Board.return_x_y(index, cordX, cordY)
         x = x_y[0]
         y = x_y[1]
-
+         
         todo = []
         visited = []
         todo.append(index)
-        self.digRec(x, y, todo, visited)
+        digged_qty = self.digRec(x, y, todo, visited, 0)
+        print("digged_qty", digged_qty)
         # Check if board is wined
         self.checkIfWin()
+        return digged_qty
 
-    def digRec(self, x, y, todo, visited):
+    def digRec(self, x, y, todo, visited, digged_qty):
         # print("BF x, y, todo, visited", x, y, todo, visited)
         if not todo:
-            return
+            print("form digRec", digged_qty)
+            return digged_qty
         else:
             # dig field
             toDig = todo.pop()
             # print("To dig", toDig)
             field = self.get_field(toDig)
             field.dig()
-
+            digged_qty += 1
             # update visited
             visited.append(toDig)
 
@@ -227,8 +230,8 @@ class Board():
             mergedTodo = self.merge(todo, nextTodo, visited)
 
             # repeat
-            # print("After repeat x, y, mergedTodo, visited, toDig", x, y, mergedTodo, visited, toDig)
-            self.digRec(x, y, mergedTodo, visited)
+            print("After repeat x, y, mergedTodo, visited, toDig", x, y, mergedTodo, visited, toDig, digged_qty)
+            return self.digRec(x, y, mergedTodo, visited, digged_qty)
 
     # Generate next index'es which you should dig
     # Check if index possible by walls
@@ -333,10 +336,10 @@ class Board():
         
         visited = []
         todo.append(ind)
-        self.digRec(x, y, todo, visited)
+        digged_qty = self.digRec(x, y, todo, visited, 0)
         self.checkIfWin()
 
-        return
+        return digged_qty
 
     # change field status flag or deflag, depends on state
 

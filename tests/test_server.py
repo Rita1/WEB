@@ -31,15 +31,15 @@ class TestServer(unittest.TestCase):
 
         run.app.config["TESTING"] = True
         self.client = run.app.test_client()
-        # data = {"restart": True}
-        # self.client.post("/", data=data)
+        data = {"restart": True}
+        self.client.post("/", data=data)
 
     def tearDown(self):
         # OLD
         os.remove("users.txt")
 
-        # data = {"restart": True}
-        # self.client.post("/", data=data)
+        data = {"restart": True}
+        self.client.post("/", data=data)
 
     def test_calculate_users(self):
         
@@ -55,7 +55,6 @@ class TestServer(unittest.TestCase):
         self.assertEqual(1, answ1["userCount"])
         self.assertEqual("xsa", answ1["users"]["9685"]["username"])
 
-
         # 2 users
         answ2 = self.client.get("/board?userName=xsa&size=small&userCookie=1005").data
         answ2 = json.loads(answ2.decode())
@@ -68,34 +67,34 @@ class TestServer(unittest.TestCase):
         self.assertEqual(2, answ3["userCount"])
 
         # # 1 user logs out
-        # answ4 = self.client.get("/board?userName=xsa&size=small&userCookie=9685&logout=True").data
-        # answ4 = json.loads(answ4.decode())
-        # self.assertEqual(1, answ4["userCount"])
+        answ4 = self.client.get("/board?userName=xsa&size=small&userCookie=9685&logout=True").data
+        answ4 = json.loads(answ4.decode())
+        self.assertEqual(1, answ4["userCount"])
 
-        # # new user logs in
-        # answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905").data
-        # answ6 = json.loads(answ6.decode())
-        # self.assertEqual(2, answ6["userCount"])
+        # new user logs in
+        answ6 = self.client.get("/board?userName=xsa&size=small&userCookie=9905").data
+        answ6 = json.loads(answ6.decode())
+        self.assertEqual(2, answ6["userCount"])
 
     # TODO - patikrinti ar teisingas user name
 
-    def test_old_user(self):
-        d = datetime.now() - timedelta(hours=1)
-        time = d.timestamp()
-        d1 = datetime.now() - timedelta(hours=48)
-        time1 = d1.timestamp()
+    # def test_old_user(self):
+    #     d = datetime.now() - timedelta(hours=1)
+    #     time = d.timestamp()
+    #     d1 = datetime.now() - timedelta(hours=48)
+    #     time1 = d1.timestamp()
 
-        d2 = datetime.now() + timedelta(hours=48)
-        time2 = d2.timestamp()
+    #     d2 = datetime.now() + timedelta(hours=48)
+    #     time2 = d2.timestamp()
 
-        with open("users.txt", 'w') as f:
-            f.write("1000;Jhon;" + str(time) + "\n" +
-                    "2000;Jhon;" + str(time1) + "\n" +
-                    "3000;Jhon;" + str(time2) + "\n")
+    #     with open("users.txt", 'w') as f:
+    #         f.write("1000;Jhon;" + str(time) + "\n" +
+    #                 "2000;Jhon;" + str(time1) + "\n" +
+    #                 "3000;Jhon;" + str(time2) + "\n")
         
-        answ0 = self.client.get("/board").data
-        answ0 = json.loads(answ0.decode())
-        self.assertEqual(1, answ0["userCount"])
+    #     answ0 = self.client.get("/board").data
+    #     answ0 = json.loads(answ0.decode())
+    #     self.assertEqual(1, answ0["userCount"])
     
     def test_debug_mode(self):
         data = {"restart": True, "debug": True}
@@ -219,6 +218,36 @@ class TestServer(unittest.TestCase):
 
         self.assertFalse(answ3["gameStarted"])
         self.assertTrue("board" not in answ3)
+
+    def test_update_user_info(self):
+
+        data = {"restart": True, "debug": True}
+        self.client.post("/", data=data)
+
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=0").data
+        answ1 = json.loads(answ1.decode())
+
+        u1 = answ1["users"]["1000"]
+        self.assertEqual(1, u1["flaged_qty"])
+        self.assertEqual(0, u1["digged_qty"])
+        self.assertEqual(1, u1["total_qty"])
+
+        answ1 = self.client.get("/board?userName=Jhon&userCookie=2000&action=dig&id=1").data
+        answ1 = json.loads(answ1.decode())
+
+        u1 = answ1["users"]["2000"]
+        self.assertEqual(0, u1["flaged_qty"])
+        self.assertEqual(1, u1["digged_qty"])
+        self.assertEqual(1, u1["total_qty"])
+
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=9").data
+        answ1 = json.loads(answ1.decode())
+        u1 = answ1["users"]["1000"]
+        self.assertEqual(1, u1["flaged_qty"])
+        self.assertEqual(11, u1["digged_qty"])
+        self.assertEqual(12, u1["total_qty"])
+        
+        print("answ1",answ1)
 
 
 if __name__ == '__main__':

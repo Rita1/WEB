@@ -125,18 +125,21 @@ class Server():
             f = Server.game.get_field(field_id)   
         # Dig
         boom = False
+        
         if action == 'dig' and not f.get_condition() == "FLAG":
+            digged_qty = 0
             if f.is_Bomb():
                 Server.game.dig_bomb(field_id)
                 boom = True
                 Server.calculate_users(user_name, user_cookie, False)
             else:
-                Server.game.dig(field_id)
+                digged_qty = Server.game.dig(field_id)
+            Server.update_users_info(user_cookie, action, digged_qty)    
         # Flag-unflag        
         if action == 'flag':
             Server.game.flag(field_id)
+            Server.update_users_info(user_cookie, action, 1)
         # Restart server
-        print("restart", restart)
         if restart:
             Server.restart_game()
         # Return answer
@@ -150,7 +153,7 @@ class Server():
     
     def getGame(size):
         
-        # print("Server.game, size, debug", Server.game, size, debug)
+        print("Server.game, size, debug", Server.game, size, Server.debug)
         if not Server.game and Server.debug:
             Server.restart_server()
             Server.game = board.Board(size, Server.file1)
@@ -166,86 +169,42 @@ class Server():
 
     def calculate_users(user_name, user_cookie, logout=False):
         
-        print("user_name, cookie, logout", user_name, user_cookie, logout)
-        print("USERS CALCULATING STARTED")
-        buffer = io.StringIO()
         found = False
         count = 0
-        d = datetime.now() - timedelta(hours=Server.HOURS_OLD)
-        t1 = d.timestamp()
-
-        if not os.path.exists('users.txt'):
-            open("users.txt", 'a').close()
-
-        with open('users.txt', 'r') as to_read:
-            for line in to_read:
-                li = line.split(";")
-                line_cookie = li[0]
-                line_timestamp = float(li[2])
-                if line_cookie == user_cookie and logout:
-                    found = True
-                elif line_cookie == user_cookie:
-                    found = True
-                    if line_timestamp > t1:
-                        buffer.write(line)
-                        count += 1
-                elif line_timestamp > t1:
-                    buffer.write(line)
-                    count += 1
-
-        if not found:
-            if user_cookie and user_name and not logout:
-                time = datetime.now().timestamp()
-                str_to_write = user_cookie + ";" +  user_name + ";" + str(time) + "\n"
-                buffer.write(str_to_write)
-                count += 1
-        with open('users.txt', 'w') as to_write:
-            to_write.write(buffer.getvalue())
-            buffer.flush()
-
-        # NEW 
-        # found = False
-        # if user_cookie:
-        #     print("USERS CALC user_cookie", Server.users)
-        #     
-
-        #     for u in Server.users:
-        #         print("USERS CALC for u", Server.users)
-        #         u_cookie = u.return_cookie()
-        #         u_timestamp = u.return_timestamp()
-        #         if u_cookie == user_cookie and logout:
-        #             found = True
-        #         elif u_cookie == user_cookie:
-        #             found = True
-        #             if u_timestamp > t1:
-        #                 #! Server.users.append(u)
-        #         elif u_timestamp > t1:
-        #             #! Server.users.append(u)
-
         if user_cookie and user_name and not logout:
-            # time = datetime.now().timestamp()
-            u = user.User(user_name, user_cookie)
-            Server.users.append(u)
-
-        # print("U", u)
-        
+            new_user = user.User(user_name, user_cookie)
+            if not Server.users:
+                Server.users.append(new_user)
+            if user_cookie not in [u.return_cookie() for u in Server.users]:
+                Server.users.append(new_user)
+        if user_cookie and logout:
+            for u in Server.users:
+                if u.return_cookie() == user_cookie:
+                    Server.users.remove(u)
         Server.active_users = len(Server.users)
-        print("USERS CALCULATING END")
-        # print("calculating users", Server.active_users)
-    
-    def users_info():
-        print("USERS INFO STARTED")
-        myDict = {}
+  
+    def update_users_info(user_cookie, action, qty):
         for u in Server.users:
+            if u.return_cookie() == user_cookie:
+                if action == "flag":
+                    u.increase_flag(qty)
+                    print("u increased flag", u.get_info())
+                if action == "dig":
+                    u.increase_digged(qty)
+                    print("u increase_digged", u.get_info())
+
+    def users_info():
+        myDict = {}
+        sorted_users = sorted(Server.users, key=lambda u: u.return_total_qty(), reverse=True)
+        for u in sorted_users:
             myDict[u.return_cookie()] = u.get_info()
-        print("USERS INFO END", myDict)    
         return myDict
         
     def restart_server():
         print("Server restart!")
-        if os.path.exists('users.txt'):
-            open("users.txt", 'w').close()
-        # Server.users = []    
+        # if os.path.exists('users.txt'):
+        #     open("users.txt", 'w').close()
+        Server.users = []  
         Server.game = ''
         Server.active_users = 0
 
@@ -294,7 +253,6 @@ class Server():
         answ["ID"] = str(Server.game)
         user_count = Server.active_users
         answ["userCount"] = user_count
-        # answ["users"] = Server.users.getInfo()
         answ["users"] = Server.users_info()
         if Server.game:
             answ["gameStarted"] = True

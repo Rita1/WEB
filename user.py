@@ -16,18 +16,29 @@ class User():
         self.timestamp = datetime.now().timestamp()
         self.flaged_qty = 0
         self.digged_qty = 0
+        self.total_qty = 0
 
     def increase_flag(self, qty):
         self.flaged_qty += qty
+        self.total_qty += qty
 
     def increase_digged(self, qty):
         self.digged_qty += qty
+        self.total_qty += qty
 
     def return_cookie(self):
         return self.cookie
 
+    def return_total_qty(self):
+        return self.total_qty
+
     def return_timestamp(self):
         return self.timestamp
+
+    def make_zero(self):
+        self.flaged_qty = 0
+        self.digged_qty = 0
+        self.total_qty = 0  
     
     # returns dict about user:
         #        {
@@ -42,5 +53,6 @@ class User():
         user["cookie"] = self.cookie
         user["flaged_qty"] = self.flaged_qty
         user["digged_qty"] = self.digged_qty
+        user["total_qty"] = self.total_qty
 
         return user
