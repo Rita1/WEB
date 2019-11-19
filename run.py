@@ -65,13 +65,16 @@ class Server():
     @app.route('/stream')
     def stream():
         def push_answ():
-            while True:
-                time.sleep(1)
-                if Server.need_update == True:
-                    yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
-                    Server.need_update = False
-                    print("stream answ")
-
+            # while True:
+            #     # time.sleep(1)
+            #     if Server.need_update == True:
+            #         yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
+            #         Server.need_update = False
+            #         print("stream answ")
+            if Server.need_update == True:
+                yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
+                Server.need_update = False
+                print("stream answ")
         return Response(response=push_answ(), status=200, mimetype="text/plain", content_type="text/event-stream")
 
     # Board : sizeX, sizeY, listof Fields
