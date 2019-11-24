@@ -60,7 +60,15 @@ ol, ul {
   flex-direction: row;
 }
 
-.game-info {
-  margin-left: 20px;
+.container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 
+.game-info {
+}
+
+.game-board {
+  min-width: 300px;
+}

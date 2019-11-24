@@ -244,19 +244,63 @@ class NameForm extends React.Component {
 
 class GameInfo extends React.Component {
 
+  constructor(props) {
+    super(props)
+    this.renderUsers = this.renderUsers.bind(this)
+  }
 
- render () {
+  userItem(user) {
+    return (
+    <tr>
+      <td>{user["username"]}</td>
+      <td>{user["total_qty"]}</td>
+    </tr>
+    );
+  }
+
+// https://stackoverflow.com/questions/50862192/react-typeerror-cannot-read-property-props-of-undefined
+// https://reactjs.org/docs/lists-and-keys.html
+  renderUsers (users) {
+    var userLines = [];
+    if (users) {
+      Object.keys(users).forEach(function(key) {
+        console.log(key, users[key]);
+        userLines.push(users[key])
+      });
+    }
+    return (
+      <div id="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+          {userLines.map((u) =>
+            this.userItem(u)
+          )}
+      </tbody>
+      </div>
+    )
+  };
+
+  render () {
     return (
       <div id="gameInfo">
-        {this.props.userName && (<h2>Hello,  {this.props.userName}</h2>)}
+        {this.props.userName && (<h2>Hello3,  {this.props.userName}</h2>)}
         {(<button onClick={this.props.onClickRestart}>
             Restart Game
           </button>)} 
-        <h2>Active Players: {this.props.userCount}</h2>
+        <h2>Active Players6
+          : {this.props.userCount}</h2>
+        {this.renderUsers(this.props.users)}
       </div>
     );
   }
 }
+
+// (this.state.xIsNext ? "X" : "O")
 
 // {this.props.gameWin && 
 //   (<button onClick={this.props.onClickRestart}>
@@ -283,7 +327,6 @@ class Game extends React.Component {
       userName: '',
       gameStart: false,
       gameOver: false,
-      hidden: "hidden",
       userCount : 0,
       size : "small",
       cordX : 0,
@@ -291,6 +334,7 @@ class Game extends React.Component {
       fields: [],
       oneTimeChecked: false,
       gameWin: false,
+      users: '',
       
     };
 
@@ -358,6 +402,7 @@ class Game extends React.Component {
       }
       this.setState({
         userCount : data.userCount,
+        users : data.users,
       });
     }
   this.setState({
@@ -433,19 +478,24 @@ class Game extends React.Component {
 
   render() {
     
-    // console.log("State from Game render",this.state);
+    console.log("State from Game render",this.state);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
-        <div className="game-board" key={1}>
-          <GameInfo userCount={this.state.userCount} userName={this.state.userName} gameWin={this.state.gameWin}
-            onClickRestart={() => this.onClickRestart()}/>
-          <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-          {this.state.userName && this.state.gameStart && (
-            <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
-              onClick={(x, y) => this.handleClick(x, y)} 
-              onContextMenu={(x,y) => this.handleRightClick(x, y)}
-              gameOver={this.state.gameOver}/>
-            )}
+        <div className="container">
+          <div className="game-board" key={1}>
+            <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
+            {this.state.userName && this.state.gameStart && (
+              <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
+                onClick={(x, y) => this.handleClick(x, y)} 
+                onContextMenu={(x,y) => this.handleRightClick(x, y)}
+                gameOver={this.state.gameOver}/>
+              )}
+          </div>
+         <div className="game-info" key={2}>
+            <GameInfo userCount={this.state.userCount} userName={this.state.userName} 
+              gameWin={this.state.gameWin} users={this.state.users}
+              onClickRestart={() => this.onClickRestart()}/>
+          </div>
         </div>
       </Beforeunload>
     );
