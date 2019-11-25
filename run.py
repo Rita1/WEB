@@ -141,8 +141,10 @@ class Server():
             Server.update_users_info(user_cookie, action, digged_qty)    
         # Flag-unflag        
         if action == 'flag':
+            if f.get_condition() == 'UNTOUCH':
+                Server.update_users_info(user_cookie, action, 1)
             Server.game.flag(field_id)
-            Server.update_users_info(user_cookie, action, 1)
+            
         # Restart server
         if restart:
             Server.restart_game()
@@ -214,7 +216,9 @@ class Server():
 
     def restart_game():
         print("Game restart!")
-        Server.game = '' 
+        Server.game = ''
+        for u in Server.users:
+            u.make_zero() 
 
     def toJson():
         answ = {}

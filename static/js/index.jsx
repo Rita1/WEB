@@ -269,7 +269,7 @@ class GameInfo extends React.Component {
       });
     }
     return (
-      <div id="table">
+      <table id="table" className="table table-striped">
       <thead>
         <tr>
           <th>Name</th>
@@ -281,18 +281,18 @@ class GameInfo extends React.Component {
             this.userItem(u)
           )}
       </tbody>
-      </div>
+      </table>
     )
   };
 
   render () {
     return (
       <div id="gameInfo">
-        {this.props.userName && (<h2>Hello3,  {this.props.userName}</h2>)}
+        {this.props.userName && (<h2>Hello,  {this.props.userName}</h2>)}
         {(<button onClick={this.props.onClickRestart}>
             Restart Game
           </button>)} 
-        <h2>Active Players6
+        <h2>Active Players
           : {this.props.userCount}</h2>
         {this.renderUsers(this.props.users)}
       </div>
@@ -323,7 +323,7 @@ class Game extends React.Component {
     super(props);
     this.state = {
       name : '',
-      userCookie: Cookies.get('cookie'),
+      userCookie: '',
       userName: '',
       gameStart: false,
       gameOver: false,
@@ -429,13 +429,16 @@ class Game extends React.Component {
 
   // Gets name, changes user name in state, passed to FORM
   handleSubmitForm (name, size) {
-  
-    var randomInt = Math.floor(Math.random() * 10000);
+    
+    var cookie = this.state.userCookie;
+    if (!cookie) {
+      var cookie = Math.floor(Math.random() * 10000);
+    };
     this.setState({
       userName : name,
       gameStart: true,
       size: size,
-      userCookie: randomInt,
+      userCookie: cookie,
     }, () => {
       this.getData();
     });
