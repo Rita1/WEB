@@ -213,8 +213,9 @@ class Board():
             toDig = todo.pop()
             # print("To dig", toDig)
             field = self.get_field(toDig)
-            field.dig()
-            digged_qty += 1
+            if field.get_condition() == 'UNTOUCH':
+                field.dig()
+                digged_qty += 1
             # update visited
             visited.append(toDig)
 
