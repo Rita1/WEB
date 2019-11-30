@@ -18,17 +18,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import Cookies from 'js-cookie';
 import { Beforeunload } from 'react-beforeunload';
+import classNames from 'classnames';
 
 var $ = require('jquery');
 
 function Field(props) {
-  var bnt_class = 'square';
+  var bnt_class = 'square-' + props.size;
   var bState = '';
   if  (props.status.condition == 'FLAG') {
     bState = "F";
   }
   else if (props.status.condition != 'UNTOUCH') {
-    bnt_class = 'square-clicked';
+    bnt_class = 'square-clicked-' + props.size;
     bState = props.status.bomb_count;
   }
   return (
@@ -88,7 +89,7 @@ class Board extends React.Component {
   renderField(x, y) {
     var i = this.return_index(x, y, this.props.cordX);
     return <Field i={i} status={this.props.fields[i]} onClick={() => this.props.onClick(i)}
-    onContextMenu={(e) => this.props.onContextMenu(e, i)}/>;
+    onContextMenu={(e) => this.props.onContextMenu(e, i)} size={this.props.size}/>;
   }
 
   renderBoardCol(y) {
@@ -194,7 +195,7 @@ class NameForm extends React.Component {
   // https://reactjs.org/docs/forms.html
   render() {
     return (
-      <div>
+      <div class="form-group">
         {!this.state.isRegister && !this.props.gameStarted && (
         <form onSubmit={this.handleSubmit}>
           <label>
@@ -288,12 +289,12 @@ class GameInfo extends React.Component {
   render () {
     return (
       <div id="gameInfo">
-        {this.props.userName && (<h2>Hello,  {this.props.userName}</h2>)}
+        {this.props.userName && (<h3>Hello,  {this.props.userName}</h3>)}
         {(<button onClick={this.props.onClickRestart}>
             Restart Game
           </button>)} 
-        <h2>Active Players
-          : {this.props.userCount}</h2>
+        <h3>Active Players:
+           {this.props.userCount}</h3>
         {this.renderUsers(this.props.users)}
       </div>
     );
@@ -480,18 +481,19 @@ class Game extends React.Component {
   }
 
   render() {
-    
+    var boardClass = 'game-board-' + this.state.size
     console.log("State from Game render",this.state);
+    console.log("Class name", boardClass);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="container">
-          <div className="game-board" key={1}>
+          <div className={boardClass} key={1}>
             <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
             {this.state.userName && this.state.gameStart && (
               <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
                 onClick={(x, y) => this.handleClick(x, y)} 
                 onContextMenu={(x,y) => this.handleRightClick(x, y)}
-                gameOver={this.state.gameOver}/>
+                gameOver={this.state.gameOver} size={this.state.size}/>
               )}
           </div>
          <div className="game-info" key={2}>

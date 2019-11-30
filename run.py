@@ -11,6 +11,12 @@
 # gunicorn run:app --worker-class gevent --bind 0.0.0.0:8000
 # https://github.com/Ulumanshu/SERVERD2/blob/master/Flask_Keras_Multi.py
 
+# ?? viena karta susprogus ir nuimant veliavele vel sprogsti
+# parodyti kas laimejo
+# priesas nematytu tavo veliaveles
+# ne visada atnaujina tavo info
+# race condition
+
 import json
 from datetime import datetime, timedelta
 import time
@@ -141,8 +147,6 @@ class Server():
             Server.update_users_info(user_cookie, action, digged_qty)    
         # Flag-unflag        
         if action == 'flag':
-            if f.get_condition() == 'UNTOUCH':
-                Server.update_users_info(user_cookie, action, 1)
             Server.game.flag(field_id)
             
         # Restart server
@@ -174,9 +178,6 @@ class Server():
     # deletes user, when he logouts
 
     def calculate_users(user_name, user_cookie, logout=False):
-        
-        found = False
-        count = 0
         if user_cookie and user_name and not logout:
             new_user = user.User(user_name, user_cookie)
             if not Server.users:
@@ -218,7 +219,7 @@ class Server():
         print("Game restart!")
         Server.game = ''
         for u in Server.users:
-            u.make_zero() 
+            u.make_zero()
 
     def toJson():
         answ = {}

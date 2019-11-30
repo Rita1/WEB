@@ -17,7 +17,7 @@ ol, ul {
   margin-bottom: 10px;
 }
 
-.square-clicked {
+.square-clicked-small {
   background: #fff;
   border: 1px solid #999;
   float: left;
@@ -32,7 +32,7 @@ ol, ul {
   width: 34px;
 }
 
-.square {
+.square-small {
   background: #DB7093;
   border: 1px solid #999;
   float: left;
@@ -45,6 +45,66 @@ ol, ul {
   padding: 0;
   text-align: center;
   width: 34px;
+}
+
+.square-clicked-medium {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 25px;
+  height: 25px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 25px;
+}
+
+.square-medium {
+  background: #DB7093;
+  border: 1px solid #999;
+  float: left;
+  font-size: 18px;
+  font-weight: bold;
+  line-height: 25px;
+  height: 25px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 25px;
+}
+
+.square-clicked-large {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 22px;
+  height: 22px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 22px;
+}
+
+.square-large {
+  background: #DB7093;
+  border: 1px solid #999;
+  float: left;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 22px;
+  height: 22px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 22px;
 }
 
 .square:focus {
@@ -66,9 +126,12 @@ ol, ul {
   flex-wrap: wrap;
 }
 
-.game-info {
+.game-board-small {
+  min-width: 320px;
 }
-
-.game-board {
-  min-width: 300px;
+.game-board-medium {
+  min-width: 500px;
+}
+.game-board-large {
+  min-width: 700px;
 }

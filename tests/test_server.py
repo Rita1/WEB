@@ -228,9 +228,9 @@ class TestServer(unittest.TestCase):
         answ1 = json.loads(answ1.decode())
 
         u1 = answ1["users"]["1000"]
-        self.assertEqual(1, u1["flaged_qty"])
+        self.assertEqual(0, u1["flaged_qty"])
         self.assertEqual(0, u1["digged_qty"])
-        self.assertEqual(1, u1["total_qty"])
+        self.assertEqual(0, u1["total_qty"])
 
         answ1 = self.client.get("/board?userName=Jhon&userCookie=2000&action=dig&id=1").data
         answ1 = json.loads(answ1.decode())
@@ -243,12 +243,35 @@ class TestServer(unittest.TestCase):
         answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=9").data
         answ1 = json.loads(answ1.decode())
         u1 = answ1["users"]["1000"]
-        self.assertEqual(1, u1["flaged_qty"])
+        self.assertEqual(0, u1["flaged_qty"])
         self.assertEqual(11, u1["digged_qty"])
-        self.assertEqual(12, u1["total_qty"])
-        
-        print("answ1",answ1)
+        self.assertEqual(11, u1["total_qty"])
 
+    def test_dig_bomb_unflag(self):
+        #  viena karta susprogus ir nuimant veliavele vel sprogsti
+        data = {"restart": True, "debug": True}
+        self.client.post("/", data=data)
+
+        # zymim veliava
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=1").data
+        answ1 = json.loads(answ1.decode())
+        self.assertEqual(False, answ1["gameOver"])
+        
+        # sprogdinam bomba
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=0").data
+        answ1 = json.loads(answ1.decode())
+
+        u1 = answ1["users"]["1000"]
+        self.assertEqual(0, u1["total_qty"])
+        self.assertEqual(True, answ1["gameOver"])
+        
+        # nuimam veliava
+        answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=1").data
+        answ1 = json.loads(answ1.decode())
+
+        u1 = answ1["users"]["1000"]
+        self.assertEqual(0, u1["total_qty"])
+        self.assertEqual(False, answ1["gameOver"])
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
