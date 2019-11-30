@@ -291,7 +291,7 @@ class GameInfo extends React.Component {
             <h1> Winner is - {this.props.gameWinUser} </h1>
           }
         {this.props.gameWin &&
-          (<button type="button" class="btn btn-dark" onClick={this.props.onClickRestart}>
+          (<button type="button" className="btn btn-dark" onClick={this.props.onClickRestart}>
             Restart Game
           </button>)}
         {!this.props.gameWin &&   
