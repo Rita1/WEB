@@ -16,9 +16,7 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import Cookies from 'js-cookie';
 import { Beforeunload } from 'react-beforeunload';
-import classNames from 'classnames';
 
 var $ = require('jquery');
 
@@ -289,12 +287,16 @@ class GameInfo extends React.Component {
   render () {
     return (
       <div id="gameInfo">
-        {this.props.userName && (<h3>Hello,  {this.props.userName}</h3>)}
-        {(<button onClick={this.props.onClickRestart}>
+        {this.props.gameWin && 
+            <h1> Winner is - {this.props.gameWinUser} </h1>
+          }
+        {this.props.gameWin &&
+          (<button type="button" class="btn btn-dark" onClick={this.props.onClickRestart}>
             Restart Game
-          </button>)} 
-        <h3>Active Players:
-           {this.props.userCount}</h3>
+          </button>)}
+        {!this.props.gameWin &&   
+        <h2>Active Players:
+           {this.props.userCount}</h2>}
         {this.renderUsers(this.props.users)}
       </div>
     );
@@ -303,10 +305,10 @@ class GameInfo extends React.Component {
 
 // (this.state.xIsNext ? "X" : "O")
 
-// {this.props.gameWin && 
-//   (<button onClick={this.props.onClickRestart}>
+// {this.props.gameWin &&  
+//   (<button type="button" class="btn btn-dark" onClick={this.props.onClickRestart}>
 //     Restart Game
-//   </button>)} 
+//   </button>)}
 
 class Game extends React.Component {
   // 
@@ -335,6 +337,7 @@ class Game extends React.Component {
       fields: [],
       oneTimeChecked: false,
       gameWin: false,
+      gameWinUser: 'Petraitis',
       users: '',
       
     };
@@ -399,6 +402,13 @@ class Game extends React.Component {
       if (data.board && data.board.gameWin) {
         this.setState({
           gameWin : data.board.gameWin,
+          gameWinUser : data.gameWinUser,
+        });
+      }
+      if (data.board && !data.board.gameWin) {
+        this.setState({
+          gameWin : false,
+          gameWinUser : '',
         });
       }
       this.setState({
@@ -477,19 +487,20 @@ class Game extends React.Component {
   }
 
   onClickRestart() {
+
     this.getData( { restart : true } )
+
   }
 
   render() {
     var boardClass = 'game-board-' + this.state.size
     console.log("State from Game render",this.state);
-    console.log("Class name", boardClass);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="container">
           <div className={boardClass} key={1}>
             <NameForm sendData={this.handleSubmitForm} gameStarted={this.state.gameStart} />
-            {this.state.userName && this.state.gameStart && (
+            {this.state.userName && this.state.gameStart && !this.state.gameWin && (
               <Board cordX={this.state.cordX} cordY={this.state.cordY} fields={this.state.fields} 
                 onClick={(x, y) => this.handleClick(x, y)} 
                 onContextMenu={(x,y) => this.handleRightClick(x, y)}
@@ -499,6 +510,7 @@ class Game extends React.Component {
          <div className="game-info" key={2}>
             <GameInfo userCount={this.state.userCount} userName={this.state.userName} 
               gameWin={this.state.gameWin} users={this.state.users}
+              gameWinUser={this.state.gameWinUser}
               onClickRestart={() => this.onClickRestart()}/>
           </div>
         </div>

@@ -12,8 +12,6 @@
 # https://github.com/Ulumanshu/SERVERD2/blob/master/Flask_Keras_Multi.py
 
 # ?? viena karta susprogus ir nuimant veliavele vel sprogsti
-# parodyti kas laimejo
-# priesas nematytu tavo veliaveles
 # ne visada atnaujina tavo info
 # race condition
 
@@ -206,6 +204,10 @@ class Server():
         for u in sorted_users:
             myDict[u.return_cookie()] = u.get_info()
         return myDict
+
+    def calculate_winner():
+        sorted_users = sorted(Server.users, key=lambda u: u.return_total_qty(), reverse=True)
+        return sorted_users[0].get_info()["username"]
         
     def restart_server():
         print("Server restart!")
@@ -263,9 +265,13 @@ class Server():
         user_count = Server.active_users
         answ["userCount"] = user_count
         answ["users"] = Server.users_info()
+        answ["gameWinUser"] = ''
         if Server.game:
             answ["gameStarted"] = True
             answ["board"] = Server.game.toJson()
+            print("Board", answ["board"])
+            if answ["board"]["gameWin"]:
+                answ["gameWinUser"] = Server.calculate_winner()
 
         # stream changes for all clients
         Server.need_update = True

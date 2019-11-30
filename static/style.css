@@ -3,6 +3,15 @@ body {
   margin: 20px;
 }
 
+h1 {
+  color:  #DB7093;
+  font: 24px "Century Gothic", Futura, sans-serif;
+}
+
+h2 {
+  font: 20px "Century Gothic", Futura, sans-serif;
+}
+
 ol, ul {
   padding-left: 30px;
 }
