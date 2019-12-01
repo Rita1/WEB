@@ -16,6 +16,7 @@ class Board():
     def __init__(self, size, file1=False):
         
         self.gameWin = False
+        self.size = "small"
         if not file1:
             if size == "small":
                 self.sizeX = Board.SMALL[0]
