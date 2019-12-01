@@ -389,7 +389,6 @@ class Game extends React.Component {
           gameStart : true,
         });
       }
-      console.log("data.gameOver, this.state.userCookie", data.gameOver, this.state.userCookie)
       if (data.gameOver == this.state.userCookie) {
         this.setState({
           gameOver : true,
@@ -458,18 +457,15 @@ class Game extends React.Component {
 
   // Send Left and right click info to server
   handleClick (i) {
-    // console.log("Handle click")
     this.getData( { action : 'dig', id : i } )
   }
 
   handleRightClick(e, i) {
-    // console.log("Right click")
     e.preventDefault();
     this.getData( { action : 'flag', id : i } )
   }
   // Send to server, when window is closed
   handleUnload () {
-    // console.log("Status unload")
     this.getData( { logout : true } )
   } 
 
@@ -481,7 +477,6 @@ class Game extends React.Component {
   //   Liepiam registruotis, bet neduodam pasirinkti dydzio
 
   getDateCheckGameStatus() {
-    // console.log("Status check")
     if ( ! this.state.oneTimeChecked ) {
         this.getData( { checkStart : true } )
     }    
@@ -495,7 +490,6 @@ class Game extends React.Component {
 
   render() {
     var boardClass = 'game-board-' + this.state.size
-    console.log("State from Game render, boardClass",this.state, boardClass);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="container">
