@@ -263,7 +263,6 @@ class GameInfo extends React.Component {
     var userLines = [];
     if (users) {
       Object.keys(users).forEach(function(key) {
-        console.log(key, users[key]);
         userLines.push(users[key])
       });
     }
@@ -337,7 +336,7 @@ class Game extends React.Component {
       fields: [],
       oneTimeChecked: false,
       gameWin: false,
-      gameWinUser: 'Petraitis',
+      gameWinUser: 'Unknown',
       users: '',
       
     };
@@ -376,6 +375,7 @@ class Game extends React.Component {
         this.setState({
           cordX : data.board.cordX,
           cordY : data.board.cordY,
+          size : data.board.size,
         });
       }
       if (!data.board) {
@@ -389,12 +389,13 @@ class Game extends React.Component {
           gameStart : true,
         });
       }
-      if (data.gameOver) {
+      console.log("data.gameOver, this.state.userCookie", data.gameOver, this.state.userCookie)
+      if (data.gameOver == this.state.userCookie) {
         this.setState({
           gameOver : true,
         });
       }
-      if (!data.gameOver) {
+      if (!data.gameOver || data.gameOver != this.state.userCookie) {
         this.setState({
           gameOver : false,
         });
@@ -494,7 +495,7 @@ class Game extends React.Component {
 
   render() {
     var boardClass = 'game-board-' + this.state.size
-    console.log("State from Game render",this.state);
+    console.log("State from Game render, boardClass",this.state, boardClass);
     return ( 
       <Beforeunload onBeforeunload={this.handleUnload}>
         <div className="container">

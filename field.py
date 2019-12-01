@@ -15,7 +15,6 @@ class Field():
 
     def setNotBomb(self):
         self.isBomb = False
-        # self.countBomb = 0
 
     def is_Bomb(self):
         bomb = self.isBomb

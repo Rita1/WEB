@@ -11,14 +11,12 @@
 # gunicorn run:app --worker-class gevent --bind 0.0.0.0:8000
 # https://github.com/Ulumanshu/SERVERD2/blob/master/Flask_Keras_Multi.py
 
-# ?? viena karta susprogus ir nuimant veliavele vel sprogsti
+# viena karta susprogus ir nuimant veliavele vel sprogsti - jeigu vienas useris susprogo, kazkaip sprogsta ir kitas
+# ant firefox negrazi medium lentele
 # ne visada atnaujina tavo info
 # race condition
 
 import json
-from datetime import datetime, timedelta
-import time
-import io
 import os
 from flask import Flask, render_template, request, Response
 try:
@@ -28,8 +26,6 @@ except:
     import board
     import user
 
-
-# app = Flask(__name__,  template_folder='./static')
 app = Flask(__name__, static_url_path='/static', template_folder='./static')
 
 __location__ = os.path.realpath(
@@ -39,7 +35,7 @@ __location__ = os.path.realpath(
 class Server():
 
 # board'o desineje saugoma lentele su useriais ir ju taskais
-# uz kiekviena atidaryta arba uzymeta veliavyte langeli gauni po taska
+# uz kiekviena atidaryta  langeli gauni po taska
 # laimi tas kuris zaidimo pabaigoje (gameWin) turi daugiausia tasku
 # lentele isrikiuojama pagal daugiausiai turinti tasku zaideja
 
@@ -48,15 +44,12 @@ class Server():
     HOURS_OLD = 1
     debug = False
     file1 = os.path.join(__location__, 'tests/boards/board3') # 3
-    need_update = False
+    # need_update = False
     users = []
-    # users = [user_id, user_id, user_id]
 
     @app.route('/', methods=['GET', 'POST'])
     def index():
         if request.method == 'POST':
-            # print("request, data, form", request, request.data, request.form)
-            # data = json.loads(request.data.decode())
             restart = request.form.get('restart')
             if restart:
                 Server.restart_server()
@@ -76,10 +69,11 @@ class Server():
             #         yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
             #         Server.need_update = False
             #         print("stream answ")
-            if Server.need_update == True:
-                yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
-                Server.need_update = False
-                print("stream answ")
+            # if Server.need_update == True:
+            #     yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
+            #     Server.need_update = False
+            #     print("stream answ")
+            yield 'data'+': '+ str(json.dumps(Server.toJson()))+'\n'+'\n'
         return Response(response=push_answ(), status=200, mimetype="text/plain", content_type="text/event-stream")
 
     # Board : sizeX, sizeY, listof Fields
@@ -153,15 +147,14 @@ class Server():
         # Return answer
         answ = Server.toJson()
         if boom:
-            answ["gameOver"] = True
+            answ["gameOver"] = user_cookie
 
         answ_json = json.dumps(answ)
         print("answ_json", answ_json)
         return Response(answ_json, mimetype='application/json')
     
     def getGame(size):
-        
-        print("Server.game, size, debug", Server.game, size, Server.debug)
+
         if not Server.game and Server.debug:
             Server.restart_server()
             Server.game = board.Board(size, Server.file1)
@@ -193,10 +186,8 @@ class Server():
             if u.return_cookie() == user_cookie:
                 if action == "flag":
                     u.increase_flag(qty)
-                    print("u increased flag", u.get_info())
                 if action == "dig":
                     u.increase_digged(qty)
-                    print("u increase_digged", u.get_info())
 
     def users_info():
         myDict = {}
@@ -210,15 +201,11 @@ class Server():
         return sorted_users[0].get_info()["username"]
         
     def restart_server():
-        print("Server restart!")
-        # if os.path.exists('users.txt'):
-        #     open("users.txt", 'w').close()
         Server.users = []  
         Server.game = ''
         Server.active_users = 0
 
     def restart_game():
-        print("Game restart!")
         Server.game = ''
         for u in Server.users:
             u.make_zero()
@@ -269,16 +256,14 @@ class Server():
         if Server.game:
             answ["gameStarted"] = True
             answ["board"] = Server.game.toJson()
-            print("Board", answ["board"])
             if answ["board"]["gameWin"]:
                 answ["gameWinUser"] = Server.calculate_winner()
 
         # stream changes for all clients
-        Server.need_update = True
+        # Server.need_update = True
         return answ
 
 
         
 if __name__ == "__main__":
-    #  app.run(host='0.0.0.0', threaded=True,)
     app.run(host='0.0.0.0', debug=True)

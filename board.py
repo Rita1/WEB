@@ -20,15 +20,15 @@ class Board():
             if size == "small":
                 self.sizeX = Board.SMALL[0]
                 self.sizeY = Board.SMALL[1]
-                # print("small", self.sizeX, self.sizeY)
+                self.size = "small"
             elif size == "medium":
                 self.sizeX = Board.MEDIUM[0]
                 self.sizeY = Board.MEDIUM[1]
-                # print("medium", self.sizeX, self.sizeY)
+                self.size = "medium"
             else:
                 self.sizeX = Board.LARGE[0]
                 self.sizeY = Board.LARGE[1]
-                # print("large", self.sizeX, self.sizeY)
+                self.size = "large"
             new_board_fields = Board.get_new_fields(self.sizeX, self.sizeY)
             new_board_with_bombs = Board.set_bombs(new_board_fields, self.sizeX, self.sizeY)
             with_bombs_count = Board.count_bombs(new_board_with_bombs, self.sizeX, self.sizeY)
@@ -223,13 +223,11 @@ class Board():
             nextTodo = []
             x = field.getX()
             y = field.getY()
-            # print("Field to json", field.toJson())
             if (field.getBombCount() == 0):
                 nextTodo = self.next_todo(x, y)
             mergedTodo = self.merge(todo, nextTodo, visited)
 
             # repeat
-            # print("After repeat x, y, mergedTodo, visited, toDig", x, y, mergedTodo, visited, toDig, digged_qty)
             return self.digRec(x, y, mergedTodo, visited, digged_qty)
 
     # Generate next index'es which you should dig
@@ -283,13 +281,9 @@ class Board():
 	# @return List of Integer - new todo, which should dig
     
     def merge(self, todo, nextTodo, visited):
-        # print("stated next")
         for next in nextTodo:
-            # print("nextTodo")
             if next not in todo:
-              #  print("not in todo")
                 if next not in visited:
-                   # print("not in visited")
                     todo.append(next)
         return todo
     
@@ -314,13 +308,11 @@ class Board():
         counter = []
         for i in range(cordX * cordY):
             counter.append(0)
-        # print("Counter len", len(counter))
         # 2.1 Calculate which fields need to change
         count = Board.update_count(counter, f, cordX, cordY)
         todo = []
         # 3 Update felds
         for c in range(len(count)):
-            # print("c", c)
             fieldToUpdate = self.get_field(c)
             if (count[c] == 1) and (fieldToUpdate.getBombCount() > 0):
                 bombs = fieldToUpdate.getBombCount()
@@ -328,7 +320,6 @@ class Board():
                 
                 # situs irgi reikia perkasti
                 if fieldToUpdate.getBombCount() == 0 and not fieldToUpdate.is_Bomb():
-                    # print("Which field is 0, after bomb index", c, fieldToUpdate.getBombCount())
                     todo.append(c)
 
         # 4. dig recursive
@@ -387,6 +378,7 @@ class Board():
         myDict["gameWin"] = self.gameWin
         myDict["cordX"] = self.sizeX
         myDict["cordY"] = self.sizeY
+        myDict["size"] = self.size
         
         count = 0
         fields_dict = {}

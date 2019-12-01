@@ -147,7 +147,7 @@ class TestServer(unittest.TestCase):
         
         answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=dig&id=0").data
         answ1 = json.loads(answ1.decode())
-        self.assertEqual(True, answ1["gameOver"])
+        self.assertEqual("1000", answ1["gameOver"])
         self.assertFalse(answ1["board"]["gameWin"])
         
         f1 = answ1["board"]["fieldList"]["0"]
@@ -263,7 +263,7 @@ class TestServer(unittest.TestCase):
 
         u1 = answ1["users"]["1000"]
         self.assertEqual(0, u1["total_qty"])
-        self.assertEqual(True, answ1["gameOver"])
+        self.assertEqual("1000", answ1["gameOver"])
         
         # nuimam veliava
         answ1 = self.client.get("/board?userName=Ali&userCookie=1000&action=flag&id=1").data
